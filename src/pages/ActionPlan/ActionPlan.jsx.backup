@@ -1,0 +1,1545 @@
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import CreateNewCategoryDialog from "./CreateNewCategoryDialog";
+import DeleteCategoryDialog from "./DeleteCategoryDialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../../components/ui/collapsible";
+// import { ReactSortable } from "react-sortablejs";
+import {
+  getAllActionPlans,
+  selectActionPlans,
+  updateSelectedActionPlan,
+  updateselectedCategory,
+  updateselectedPointer,
+  getExternalActionPlans,
+  selectExternalActionPlans,
+  markActionPlan,
+  markCategory,
+  markPointer,
+  editActionPlan,
+  updateIsOpenedForDoc,
+  updateIsOpenedForCategory,
+  updateIsOpenedForPointer,
+  updatesinglePointerInfo,
+  updateActionPlans,
+} from "../../redux/slices/actionPlanSlice";
+import CreateNewActionPlanDialog from "./CreateNewActionPlanDialog";
+import CreateNewPointerDialog from "./CreateNewPointerDialog";
+import DeleteActionPlanDialog from "./DeleteActionPlanDialog";
+import DeletePointerDialog from "./DeletePointerDialog";
+import ManageActionPlanAccessDialog from "./ManageActionPlanAccessDialog";
+import { hasPermission_create_actionPlans } from "../../utils/permissions";
+import { set } from "lodash";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import { Checkbox } from "../../components/ui/checkbox";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
+import {
+  Plus,
+  MoreVertical,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Folder,
+  FolderOpen,
+  CheckCircle,
+  Circle,
+  Search
+} from "lucide-react";
+import { Progress } from "../../components/ui/progress";
+import "./ActionPlan.css";
+
+function ActionPlan() {
+  const [selectedMenu, setselectedMenu] = useState("Internal");
+  const actionPlans = useSelector(selectActionPlans);
+  const extActionPlans = useSelector(selectExternalActionPlans);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const ProjectsMenus = [
+    {
+      name: "Internal",
+    },
+    {
+      name: "External",
+    },
+  ];
+
+  const RightProjectsMenus = [];
+
+  let internalActionPlanSortData = Object.assign(actionPlans);
+  let externalActionPlanSortData = Object.assign(extActionPlans);
+
+  const [allActionPlans, setallActionPlans] = useState([
+    internalActionPlanSortData,
+  ]);
+  console.log("allActionPlans :>> ", allActionPlans);
+
+  const [allExtActionPlans, setallExtActionPlans] = useState([
+    externalActionPlanSortData,
+  ]);
+
+  useEffect(() => {
+    dispatch(getAllActionPlans());
+    dispatch(getExternalActionPlans());
+  }, [selectedMenu]);
+
+  useEffect(() => {
+    setallActionPlans(
+      actionPlans.map((plan) => {
+        let tempPlan = {
+          ...plan,
+        };
+        tempPlan.category = tempPlan.category.map((cat) => {
+          let tempcat = {
+            ...cat,
+          };
+          tempcat.content = tempcat.content.map((content) => {
+            return {
+              ...content,
+            };
+          });
+          return tempcat;
+        });
+        return tempPlan;
+      })
+    );
+  }, [actionPlans]);
+
+  useEffect(() => {
+    setallExtActionPlans(
+      extActionPlans.map((plan) => {
+        let tempPlan = { ...plan };
+        tempPlan.category = tempPlan.category.map((cat) => {
+          let tempcat = { ...cat };
+          tempcat.content = tempcat.content.map((cat) => {
+            return { ...cat };
+          });
+          return tempcat;
+        });
+        return tempPlan;
+      })
+    );
+  }, [extActionPlans]);
+
+  const setIsOpenedForDoc = (id, isOpened) => {
+    let temp = allActionPlans.map((plan) => {
+      if (plan._id === id) {
+        plan.isOpened = isOpened;
+
+        dispatch(
+          updateIsOpenedForDoc({
+            name: plan.name,
+            isOpened: isOpened,
+            actionPlanId: id,
+          })
+        );
+      }
+      return plan;
+    });
+    setallActionPlans(temp);
+  };
+
+  const filterNan = (value) => {
+    return isNaN(value) ? 0 : value;
+  };
+  const setIsOpenedForCategory = (id, isOpened) => {
+    let temp = allActionPlans.map((plan) => {
+      plan.category = plan.category.map((cat) => {
+        if (cat._id === id) {
+          cat.isOpened = isOpened;
+
+          dispatch(
+            updateIsOpenedForCategory({
+              name: cat.name,
+              isOpened: isOpened,
+              categoryId: id,
+            })
+          );
+        }
+        return cat;
+      });
+      return plan;
+    });
+    setallActionPlans(temp);
+  };
+
+  const setIsOpenedForContent = (id, isOpened) => {
+    let temp = allActionPlans.map((plan) => {
+      plan.category = plan.category.map((cat) => {
+        cat.content = cat.content.map((content) => {
+          if (content._id === id) {
+            content.isOpened = isOpened;
+
+            dispatch(
+              updateIsOpenedForPointer({
+                name: content.name,
+                isOpened: isOpened,
+                data: content.data,
+                pointerId: id,
+              })
+            );
+          }
+          return content;
+        });
+        return cat;
+      });
+      return plan;
+    });
+    setallActionPlans(temp);
+  };
+
+  const setAllIsOpenedToTrue = () => {
+    let temp = allActionPlans.map((plan) => {
+      plan.isOpened = true;
+      plan.category = plan.category.map((cat) => {
+        cat.isOpened = true;
+        cat.content = cat.content.map((content) => {
+          content.isOpened = true;
+          return content;
+        });
+        return cat;
+      });
+      return plan;
+    });
+    setallActionPlans(temp);
+  };
+
+  const setAllIsOpenedToFalse = () => {
+    let temp = allActionPlans.map((plan) => {
+      plan.isOpened = false;
+      plan.category = plan.category.map((cat) => {
+        cat.isOpened = false;
+        cat.content = cat.content.map((content) => {
+          content.isOpened = false;
+          return content;
+        });
+        return cat;
+      });
+      return plan;
+    });
+    setallActionPlans(temp);
+  };
+
+  const external_setIsOpenedForDoc = (id, isOpened) => {
+    let temp = allExtActionPlans.map((plan) => {
+      if (plan._id === id) {
+        plan.isOpened = isOpened;
+
+        dispatch(
+          updateIsOpenedForDoc({
+            name: plan.name,
+            isOpened: isOpened,
+            actionPlanId: id,
+          })
+        );
+      }
+      return plan;
+    });
+    setallExtActionPlans(temp);
+  };
+
+  const external_setIsOpenedForCategory = (id, isOpened) => {
+    let temp = allExtActionPlans.map((plan) => {
+      plan.category = plan.category.map((cat) => {
+        if (cat._id === id) {
+          cat.isOpened = isOpened;
+
+          dispatch(
+            updateIsOpenedForCategory({
+              name: cat.name,
+              isOpened: isOpened,
+              categoryId: id,
+            })
+          );
+        }
+        return cat;
+      });
+      return plan;
+    });
+    setallExtActionPlans(temp);
+  };
+
+  const external_setIsOpenedForContent = (id, isOpened) => {
+    let temp = allExtActionPlans.map((plan) => {
+      plan.category = plan.category.map((cat) => {
+        cat.content = cat.content.map((content) => {
+          if (content._id === id) {
+            content.isOpened = isOpened;
+
+            dispatch(
+              updateIsOpenedForPointer({
+                name: content.name,
+                isOpened: isOpened,
+                data: content.data,
+                pointerId: id,
+              })
+            );
+          }
+          return content;
+        });
+        return cat;
+      });
+      return plan;
+    });
+    setallExtActionPlans(temp);
+  };
+
+  const external_setAllIsOpenedToTrue = () => {
+    let temp = allExtActionPlans.map((plan) => {
+      plan.isOpened = true;
+      plan.category = plan.category.map((cat) => {
+        cat.isOpened = true;
+        cat.content = cat.content.map((content) => {
+          content.isOpened = true;
+          return content;
+        });
+        return cat;
+      });
+      return plan;
+    });
+    setallExtActionPlans(temp);
+  };
+
+  const external_setAllIsOpenedToFalse = () => {
+    let temp = allExtActionPlans.map((plan) => {
+      plan.isOpened = false;
+      plan.category = plan.category.map((cat) => {
+        cat.isOpened = false;
+        cat.content = cat.content.map((content) => {
+          content.isOpened = false;
+          return content;
+        });
+        return cat;
+      });
+      return plan;
+    });
+    setallExtActionPlans(temp);
+  };
+
+  return (
+    <>
+      <div className="min-h-screen bg-gray-50 dark:bg-muted">
+        <div className="container mx-auto py-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-lg sm:text-3xl font-medium sm:font-semibold text-foreground">Action Plans</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">All your process at one place</p>
+            </div>
+
+            <div className="flex gap-3">
+              {selectedMenu === "Internal" && (
+                <Button
+                  onClick={() => {
+                    const modal = document.getElementById('createActionPlanModal');
+                    if (modal) {
+                      const bootstrapModal = new window.bootstrap.Modal(modal);
+                      bootstrapModal.show();
+                    }
+                    dispatch(updateSelectedActionPlan(null));
+                  }}
+                  disabled={!hasPermission_create_actionPlans()}
+                  className="font-medium bg-black hover:bg-black/90 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Action Plan
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Tabs Navigation */}
+          <div className="border-b border-border mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                {ProjectsMenus.map((menu, index) => (
+                  <button
+                    key={index}
+                    className={`px-4 py-3 text-sm font-medium transition-colors relative ${
+                      selectedMenu === menu.name
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    onClick={() => {
+                      setselectedMenu(menu.name);
+                    }}
+                  >
+                    {menu.name}
+                    {selectedMenu === menu.name && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center">
+                {RightProjectsMenus.map((menu, index) => (
+                  <button
+                    key={index}
+                    className={`px-4 py-3 text-sm font-medium transition-colors relative ${
+                      selectedMenu === menu.name
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    onClick={() => {
+                      setselectedMenu(menu.name);
+                    }}
+                  >
+                    {menu.name}
+                    {selectedMenu === menu.name && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Empty State */}
+          {actionPlans.length === 0 && (
+            <Card>
+              <CardContent className="p-12">
+                <div className="flex flex-col items-center justify-center text-center space-y-4">
+                  <img
+                    src="/static/illustrations/no-projects-found.svg"
+                    alt="No action plans"
+                    className="h-48"
+                  />
+                  <h2 className="text-xl font-semibold text-gray-900">No Action Plans Found</h2>
+                  {selectedMenu === "Internal" && hasPermission_create_actionPlans() && (
+                    <Button
+                      className="bg-gray-900 hover:bg-gray-800 text-white"
+                      data-bs-toggle="modal"
+                      data-bs-target="#createActionPlanModal"
+                      onClick={() => {
+                        dispatch(updateSelectedActionPlan(null));
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Action Plan
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Action Plans List */}
+          {selectedMenu == "Internal" && actionPlans.length !== 0 && (
+            <div className="space-y-4">
+              {/* Control Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setAllIsOpenedToFalse();
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4 mr-2" />
+                  Collapse All
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setAllIsOpenedToTrue();
+                  }}
+                >
+                  <ChevronDown className="h-4 w-4 mr-2" />
+                  Expand All
+                </Button>
+              </div>
+
+              {/* Action Plans */}
+              <div className="space-y-3">
+                  {allActionPlans &&
+                    allActionPlans?.length > 0 &&
+                    allActionPlans?.map((item, index) => {
+                      const progress = filterNan(
+                        (
+                          (item?.category
+                            ?.map((cat) => {
+                              return (
+                                cat.content?.filter((d) => d.checked)?.length +
+                                (cat.checked ? 1 : 0)
+                              );
+                            })
+                            .reduce((acc, v) => acc + v, 0) /
+                            item?.category
+                              ?.map((cat) => {
+                                return cat.content?.length + 1;
+                              })
+                              .reduce((acc, v) => acc + v, 0)) *
+                          100
+                        ).toFixed(0) || 0
+                      );
+
+                      return (
+                        <Card key={`actionplan_${index}`}>
+                          <Collapsible
+                            open={item.isOpened}
+                            onOpenChange={(isOpen) => {
+                              setIsOpenedForDoc(item._id, isOpen);
+                            }}
+                          >
+                            <div className="flex items-center justify-between p-4 hover:bg-accent/50 transition-colors">
+                              <div className="flex items-center gap-3 flex-1">
+                                <Checkbox
+                                  checked={item.checked}
+                                  onCheckedChange={(checked) => {
+                                    dispatch(
+                                      markActionPlan({
+                                        checked,
+                                        actionPlanId: item._id,
+                                      })
+                                    );
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+
+                                <CollapsibleTrigger asChild>
+                                  <button className="flex items-center gap-2 flex-1 text-left">
+                                    {item.isOpened ? (
+                                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                    <FileText className="h-5 w-5 text-muted-foreground" />
+                                    <span className="font-semibold text-foreground">{item.name}</span>
+                                  </button>
+                                </CollapsibleTrigger>
+                              </div>
+
+                              {hasPermission_create_actionPlans() && (
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                      {progress}%
+                                    </span>
+                                    <Progress value={progress} className="w-20 h-2" />
+                                  </div>
+
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          const modal = document.getElementById('createActionPlanModal');
+                                          if (modal) {
+                                            const bootstrapModal = new window.bootstrap.Modal(modal);
+                                            bootstrapModal.show();
+                                          }
+                                          dispatch(updateSelectedActionPlan(item));
+                                        }}
+                                      >
+                                        Edit Action Plan
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          const modal = document.getElementById('ManageActionPlanAccessDialog');
+                                          if (modal) {
+                                            const bootstrapModal = new window.bootstrap.Modal(modal);
+                                            bootstrapModal.show();
+                                          }
+                                          dispatch(updateSelectedActionPlan(item));
+                                        }}
+                                      >
+                                        Manage Access
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() => {
+                                          const modal = document.getElementById('DeleteActionPlanDialog');
+                                          if (modal) {
+                                            const bootstrapModal = new window.bootstrap.Modal(modal);
+                                            bootstrapModal.show();
+                                          }
+                                          dispatch(updateSelectedActionPlan(item));
+                                        }}
+                                      >
+                                        Delete Action Plan
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              )}
+                            </div>
+
+                            <CollapsibleContent>
+                              <div className="border-t border-border px-4 py-2 bg-accent/30">
+                                {item?.category?.map((singleCategory, catIndex) => {
+                                  const categoryProgress = filterNan(
+                                    (
+                                      ((singleCategory?.content?.filter(
+                                        (item) => item.checked
+                                      ).length +
+                                        (singleCategory.checked ? 1 : 0)) /
+                                        (singleCategory?.content?.length + 1)) *
+                                      100
+                                    ).toFixed(0) || 0
+                                  );
+
+                                  return (
+                                    <Collapsible
+                                      key={`cat_${singleCategory._id}`}
+                                      open={singleCategory.isOpened}
+                                      onOpenChange={(isOpen) => {
+                                        setIsOpenedForCategory(singleCategory._id, isOpen);
+                                      }}
+                                      className="border-b border-border last:border-0"
+                                    >
+                                      <div className="flex items-center justify-between py-3 hover:bg-accent/50 transition-colors">
+                                        <div className="flex items-center gap-3 flex-1">
+                                          <Checkbox
+                                            checked={singleCategory.checked}
+                                            onCheckedChange={(checked) => {
+                                              dispatch(
+                                                markCategory({
+                                                  checked,
+                                                  categoryId: singleCategory._id,
+                                                })
+                                              );
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                          />
+
+                                          <CollapsibleTrigger asChild>
+                                            <button className="flex items-center gap-2 flex-1 text-left">
+                                              {singleCategory.isOpened ? (
+                                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                              ) : (
+                                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                              )}
+                                              <Folder className="h-4 w-4 text-muted-foreground" />
+                                              <span className="font-medium text-foreground">{singleCategory.name}</span>
+                                            </button>
+                                          </CollapsibleTrigger>
+                                        </div>
+
+                                        {hasPermission_create_actionPlans() && (
+                                          <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-sm font-medium text-muted-foreground">
+                                                {categoryProgress}%
+                                              </span>
+                                              <Progress value={categoryProgress} className="w-16 h-2" />
+                                            </div>
+
+                                            <DropdownMenu>
+                                              <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                                  <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                              </DropdownMenuTrigger>
+                                              <DropdownMenuContent align="end">
+                                                <DropdownMenuItem
+                                                  onClick={() => {
+                                                    const modal = document.getElementById('CreateNewCategoryDialog');
+                                                    if (modal) {
+                                                      const bootstrapModal = new window.bootstrap.Modal(modal);
+                                                      bootstrapModal.show();
+                                                    }
+                                                    dispatch(updateSelectedActionPlan(item));
+                                                    dispatch(updateselectedCategory(singleCategory));
+                                                  }}
+                                                >
+                                                  Edit Category
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                  className="text-destructive"
+                                                  onClick={() => {
+                                                    const modal = document.getElementById('DeleteCategoryDialog');
+                                                    if (modal) {
+                                                      const bootstrapModal = new window.bootstrap.Modal(modal);
+                                                      bootstrapModal.show();
+                                                    }
+                                                    dispatch(updateSelectedActionPlan(item));
+                                                    dispatch(updateselectedCategory(singleCategory));
+                                                  }}
+                                                >
+                                                  Delete Category
+                                                </DropdownMenuItem>
+                                              </DropdownMenuContent>
+                                            </DropdownMenu>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <CollapsibleContent>
+                                          <div
+                                            aria-labelledby="headingOnes"
+                                            style={{ marginLeft: "1.3rem" }}
+                                          >
+                                            <div className="card-body-inner">
+                                              <div className="pointer-main-wrap">
+                                                {singleCategory.content.map(
+                                                  (singleContent) => (
+                                                    <div
+                                                      className="card-header-inner"
+                                                      key={`content_${item._id}`}
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        // setIsOpenedForContent(
+                                                        //   singleContent._id,
+                                                        //   !singleContent.isOpened
+                                                        // );
+
+                                                        dispatch(
+                                                          updatesinglePointerInfo(
+                                                            singleContent
+                                                          )
+                                                        );
+                                                        localStorage.setItem(
+                                                          "selected-content-name",
+                                                          singleContent.name
+                                                        );
+                                                        navigate(
+                                                          `/action-plans/${item._id}/${singleCategory._id}/${singleContent._id}/view`
+                                                        );
+                                                      }}
+                                                    >
+                                                      <button
+                                                        type="button"
+                                                        className="btn"
+                                                        disabled={
+                                                          hasPermission_create_actionPlans()
+                                                            ? false
+                                                            : true
+                                                        }
+                                                      >
+                                                        <span
+                                                          style={{
+                                                            textAlign: "left",
+                                                          }}
+                                                        >
+                                                          <span className="hoverLink fw-bold d-flex align-items-center">
+                                                            <input
+                                                              class="form-check-input mt-0"
+                                                              style={{
+                                                                marginRight:
+                                                                  "0.6rem",
+                                                              }}
+                                                              checked={
+                                                                singleContent.checked
+                                                              }
+                                                              type="checkbox"
+                                                              onClick={(e) => {
+                                                                e.stopPropagation();
+                                                              }}
+                                                              onChange={(e) => {
+                                                                e.stopPropagation();
+
+                                                                dispatch(
+                                                                  markPointer({
+                                                                    checked:
+                                                                      e.target
+                                                                        .checked,
+                                                                    contentId:
+                                                                      singleContent._id,
+                                                                  })
+                                                                );
+                                                              }}
+                                                            />
+
+                                                            <span>
+                                                              {
+                                                                singleContent.name
+                                                              }
+                                                            </span>
+                                                          </span>
+
+                                                          {/* <Collapse
+                                                            isOpened={
+                                                              singleContent.isOpened
+                                                            }
+                                                          >
+                                                            <div
+                                                              style={{
+                                                                paddingLeft:
+                                                                  "1.6rem",
+                                                              }}
+                                                              dangerouslySetInnerHTML={{
+                                                                __html:
+                                                                  singleContent.data,
+                                                              }}
+                                                            ></div>
+                                                          </Collapse> */}
+                                                        </span>
+                                                        <span
+                                                          className="title-6"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            e.preventDefault();
+                                                          }}
+                                                        >
+                                                          {hasPermission_create_actionPlans() ? (
+                                                            <div
+                                                              style={{
+                                                                display: "flex",
+                                                                alignItems:
+                                                                  "center",
+                                                              }}
+                                                            >
+                                                              {/* <p className="fw-bold mb-0">
+                                                                {filterNan(
+                                                                  (
+                                                                    (item?.category
+                                                                      ?.map(
+                                                                        (
+                                                                          cat
+                                                                        ) => {
+                                                                          return (
+                                                                            cat.content?.filter(
+                                                                              (
+                                                                                d
+                                                                              ) =>
+                                                                                d.checked
+                                                                            )
+                                                                              ?.length +
+                                                                            (cat.checked
+                                                                              ? 1
+                                                                              : 0)
+                                                                          );
+                                                                        }
+                                                                      )
+                                                                      .reduce(
+                                                                        (
+                                                                          acc,
+                                                                          v
+                                                                        ) =>
+                                                                          acc +
+                                                                          v,
+                                                                        0
+                                                                      ) /
+                                                                      item?.category
+                                                                        ?.map(
+                                                                          (
+                                                                            cat
+                                                                          ) => {
+                                                                            return (
+                                                                              cat
+                                                                                .content
+                                                                                ?.length +
+                                                                              1
+                                                                            );
+                                                                          }
+                                                                        )
+                                                                        .reduce(
+                                                                          (
+                                                                            acc,
+                                                                            v
+                                                                          ) =>
+                                                                            acc +
+                                                                            v,
+                                                                          0
+                                                                        )) *
+                                                                    100
+                                                                  ).toFixed(
+                                                                    0
+                                                                  ) || 0
+                                                                )}
+                                                                %
+                                                              </p> */}
+
+                                                              <div class="dropdown">
+                                                                <i
+                                                                  class="bi bi-three-dots-vertical custom-more-icon-hover-effect"
+                                                                  data-bs-toggle="dropdown"
+                                                                  style={{
+                                                                    padding:
+                                                                      "0.5rem",
+                                                                  }}
+                                                                ></i>
+
+                                                                <ul class="dropdown-menu">
+                                                                  <li className="border-bottom p-0">
+                                                                    <a
+                                                                      data-bs-toggle="modal"
+                                                                      data-bs-target="#CreateNewPointerDialog"
+                                                                      class="dropdown-item"
+                                                                      onClick={() => {
+                                                                        dispatch(
+                                                                          updateSelectedActionPlan(
+                                                                            item
+                                                                          )
+                                                                        );
+                                                                        dispatch(
+                                                                          updateselectedCategory(
+                                                                            singleCategory
+                                                                          )
+                                                                        );
+                                                                        dispatch(
+                                                                          updateselectedPointer(
+                                                                            singleContent
+                                                                          )
+                                                                        );
+                                                                      }}
+                                                                    >
+                                                                      Edit
+                                                                      pointer
+                                                                    </a>
+                                                                  </li>
+
+                                                                  <li className="border-bottom p-0">
+                                                                    <a
+                                                                      class="dropdown-item"
+                                                                      onClick={() => {
+                                                                        dispatch(
+                                                                          updatesinglePointerInfo(
+                                                                            singleContent
+                                                                          )
+                                                                        );
+                                                                        localStorage.setItem(
+                                                                          "selected-content-name",
+                                                                          singleContent.name
+                                                                        );
+                                                                        navigate(
+                                                                          `/action-plans/${item._id}/${singleCategory._id}/${singleContent._id}`
+                                                                        );
+                                                                      }}
+                                                                    >
+                                                                      Edit data
+                                                                    </a>
+                                                                  </li>
+
+                                                                  <li className="border-bottom p-0">
+                                                                    <a
+                                                                      data-bs-toggle="modal"
+                                                                      data-bs-target="#DeletePointerDialog"
+                                                                      class="dropdown-item"
+                                                                      onClick={() => {
+                                                                        dispatch(
+                                                                          updateSelectedActionPlan(
+                                                                            item
+                                                                          )
+                                                                        );
+                                                                        dispatch(
+                                                                          updateselectedCategory(
+                                                                            singleCategory
+                                                                          )
+                                                                        );
+                                                                        dispatch(
+                                                                          updateselectedPointer(
+                                                                            singleContent
+                                                                          )
+                                                                        );
+                                                                      }}
+                                                                    >
+                                                                      Delete
+                                                                    </a>
+                                                                  </li>
+                                                                </ul>
+                                                              </div>
+                                                            </div>
+                                                          ) : (
+                                                            <div></div>
+                                                          )}
+                                                        </span>
+                                                      </button>
+                                                    </div>
+                                                  )
+                                                )}
+                                              </div>
+                                              {hasPermission_create_actionPlans() ? (
+                                                <div
+                                                  style={{
+                                                    marginBottom: "0.5rem",
+                                                    marginTop: "0.5rem",
+                                                    cursor: "pointer",
+                                                  }}
+                                                  className="text-primary"
+                                                >
+                                                  <a
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#CreateNewPointerDialog"
+                                                    onClick={() => {
+                                                      dispatch(
+                                                        updateSelectedActionPlan(
+                                                          item
+                                                        )
+                                                      );
+                                                      dispatch(
+                                                        updateselectedCategory(
+                                                          singleCategory
+                                                        )
+                                                      );
+                                                    }}
+                                                  >
+                                                    Add Pointer{" "}
+                                                    <i className="fa fa-plus" />
+                                                  </a>
+                                                </div>
+                                              ) : (
+                                                <div></div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </Collapse>
+                                      </div>
+
+                                      {index + 1 == item?.category?.length && (
+                                        <div>
+                                          <button
+                                            style={{ marginRight: "1.3rem" }}
+                                            type="button"
+                                            class="btn btn-outline-primary w-100 mt-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#CreateNewCategoryDialog"
+                                            onClick={() => {
+                                              dispatch(
+                                                updateSelectedActionPlan(item)
+                                              );
+                                              dispatch(
+                                                updateselectedCategory(null)
+                                              );
+                                            }}
+                                            disabled={
+                                              hasPermission_create_actionPlans()
+                                                ? false
+                                                : true
+                                            }
+                                          >
+                                            Add a category +
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {item?.category?.length == 0 && (
+                            <div
+                              id={`collapse_${item._id}`}
+                              style={{ marginLeft: "1.3rem" }}
+                            >
+                              <button
+                                style={{ marginRight: "1.3rem" }}
+                                type="button"
+                                class="btn btn-outline-primary w-100 mt-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#CreateNewCategoryDialog"
+                                onClick={() => {
+                                  dispatch(updateSelectedActionPlan(item));
+                                  dispatch(updateselectedCategory(null));
+                                }}
+                              >
+                                Add a category +
+                              </button>
+                            </div>
+                          )}
+                        </Collapse>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* External Plan  */}
+        {extActionPlans.length === 0 && (
+          <div className="d-flex align-items-center justify-content-center mt-5">
+            <div className="vstack gap-3 text-center">
+              <img
+                src="/static/illustrations/no-projects-found.svg"
+                alt=""
+                height="200px"
+              />
+              <h2 className="body1 regular-weight">No Plans Found</h2>
+              {selectedMenu === "External" && (
+                <div>
+                  <button
+                    className="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#createActionPlanModal"
+                    onClick={() => {
+                      // dispatch(updateSelectedActionPlan(null));
+                    }}
+                  >
+                    + New Plan
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {selectedMenu == "External" && extActionPlans.length !== 0 && (
+          <>
+            <button
+              className="btn btn-primary mt-3 mb-3"
+              style={{ marginRight: "0.6rem" }}
+              onClick={() => {
+                external_setAllIsOpenedToFalse();
+              }}
+            >
+              Collapse All Actions
+            </button>
+
+            <button
+              className="btn btn-primary mt-3 mb-3"
+              onClick={() => {
+                external_setAllIsOpenedToTrue();
+              }}
+            >
+              Expand All Actions
+            </button>
+
+            <div className="faq_main_wrap mt-2">
+              <div className="bs-example">
+                <div className="accordion" id="accordionExample">
+                  {allExtActionPlans?.map((item) => (
+                    <div
+                      className="parent-card"
+                      key={`ep_${item._id}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        external_setIsOpenedForDoc(item._id, !item.isOpened);
+                      }}
+                    >
+                      <div
+                        className="parent-card-header draggableItem"
+                        id="headingOne"
+                      >
+                        <button
+                          type="button"
+                          className="btn"
+                          data-target={`#collapse_${item._id}`}
+                        >
+                          <span className="hoverLink fw-bold d-flex align-items-center">
+                            <input
+                              class="form-check-input mt-0"
+                              style={{
+                                marginRight: "0.5rem",
+                              }}
+                              defaultChecked={item.checked}
+                              type="checkbox"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                              onChange={(e) => {
+                                e.stopPropagation();
+
+                                dispatch(
+                                  markActionPlan({
+                                    checked: e.target.checked,
+                                    actionPlanId: item._id,
+                                  })
+                                );
+                              }}
+                            />
+
+                            <span className="fw-bold hoverLink">
+                              {item.name}
+                            </span>
+                          </span>
+
+                          <p className="fw-bold mb-0">
+                            {filterNan(
+                              (
+                                (item?.category
+                                  ?.map((cat) => {
+                                    return (
+                                      cat.content?.filter((d) => d.checked)
+                                        ?.length + (cat.checked ? 1 : 0)
+                                    );
+                                  })
+                                  .reduce((acc, v) => acc + v, 0) /
+                                  item?.category
+                                    ?.map((cat) => {
+                                      return cat.content?.length + 1;
+                                    })
+                                    .reduce((acc, v) => acc + v, 0)) *
+                                100
+                              ).toFixed(0) || 0
+                            )}
+                            %
+                          </p>
+                        </button>
+                      </div>
+                      <Collapse isOpened={item.isOpened}>
+                        {item?.category?.map((singleCategory, index) => (
+                          <div
+                            style={{ marginLeft: "1.3rem" }}
+                            id={`collapse_${item._id}`}
+                            key={`external_cat_${singleCategory._id}`}
+                            aria-labelledby="headingOne"
+                            onClick={() => {
+                              const classList = document.getElementById(
+                                `collapseIcon_${singleCategory._id}`
+                              ).classList;
+                              console.log(classList);
+                              if (classList.contains("fa-plus")) {
+                                document
+                                  .getElementById(
+                                    `collapseIcon_${singleCategory._id}`
+                                  )
+                                  .classList.remove("fa-plus");
+                                document
+                                  .getElementById(
+                                    `collapseIcon_${singleCategory._id}`
+                                  )
+                                  .classList.add("fa-minus");
+                              } else {
+                                document
+                                  .getElementById(
+                                    `collapseIcon_${singleCategory._id}`
+                                  )
+                                  .classList.remove("fa-minus");
+                                document
+                                  .getElementById(
+                                    `collapseIcon_${singleCategory._id}`
+                                  )
+                                  .classList.add("fa-plus");
+                              }
+                            }}
+                          >
+                            <div
+                              className="parent-card-body"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                external_setIsOpenedForCategory(
+                                  singleCategory._id,
+                                  !singleCategory.isOpened
+                                );
+                              }}
+                            >
+                              <div className="faq_txt_wrap">
+                                <div className="bs-example">
+                                  <div
+                                    className="accordion"
+                                    id="accordionExamples"
+                                  >
+                                    <div className="card-inner">
+                                      <div
+                                        className="card-header-inner"
+                                        id="headingOnes"
+                                      >
+                                        <button
+                                          type="button"
+                                          className="btn"
+                                          data-target={`#collapseOnes_${singleCategory._id}`}
+                                        >
+                                          <span
+                                            className="hoverLink fw-bold d-flex align-items-center"
+                                            style={{
+                                              minWidth: "100%",
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                            }}
+                                          >
+                                            <div className="hoverLink fw-bold d-flex align-items-center">
+                                              <input
+                                                class="form-check-input mt-0"
+                                                style={{
+                                                  marginRight: "0.5rem",
+                                                }}
+                                                defaultChecked={
+                                                  singleCategory.checked
+                                                }
+                                                type="checkbox"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                }}
+                                                onChange={(e) => {
+                                                  e.stopPropagation();
+
+                                                  dispatch(
+                                                    markCategory({
+                                                      checked: e.target.checked,
+                                                      categoryId:
+                                                        singleCategory._id,
+                                                    })
+                                                  );
+                                                }}
+                                              />
+
+                                              <span className="fw-bold hoverLink">
+                                                {singleCategory.name}
+                                              </span>
+                                            </div>
+
+                                            <span
+                                              className="title-6"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.preventDefault();
+                                              }}
+                                            >
+                                              <div
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                }}
+                                              >
+                                                <p className="fw-bold mb-0">
+                                                  {filterNan(
+                                                    (
+                                                      ((singleCategory?.content?.filter(
+                                                        (item) => item.checked
+                                                      ).length +
+                                                        (singleCategory.checked
+                                                          ? 1
+                                                          : 0)) /
+                                                        (singleCategory?.content
+                                                          ?.length +
+                                                          1)) *
+                                                      100
+                                                    ).toFixed(0) || 0
+                                                  )}
+                                                  %
+                                                </p>
+                                              </div>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </div>
+                                      <Collapse
+                                        isOpened={singleCategory.isOpened}
+                                      >
+                                        <div
+                                          id={`collapseOnes_${singleCategory._id}`}
+                                          aria-labelledby="headingOnes"
+                                          data-parent="#accordionExamples"
+                                        >
+                                          <div className="card-body-inner">
+                                            <div
+                                              className="pointer-main-wrap"
+                                              style={{ paddingLeft: "1.6rem" }}
+                                            >
+                                              {/* <ReactSortable
+                                                  list={singleCategory.content}
+                                                  setList={(e) => {
+                                                    console.log(e);
+                                                  }}
+                                                > */}
+                                              {singleCategory.content.map(
+                                                (singleContent, index) => (
+                                                  <div
+                                                    className="card-header-inner"
+                                                    key={`external_content_${item._id}`}
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      e.preventDefault();
+                                                      // external_setIsOpenedForContent(
+                                                      //   singleContent._id,
+                                                      //   !singleContent.isOpened
+                                                      // );
+
+                                                      dispatch(
+                                                        updatesinglePointerInfo(
+                                                          singleContent
+                                                        )
+                                                      );
+                                                      localStorage.setItem(
+                                                        "selected-content-name",
+                                                        singleContent.name
+                                                      );
+                                                      navigate(
+                                                        `/action-plans/${item._id}/${singleCategory._id}/${singleContent._id}/view`
+                                                      );
+                                                    }}
+                                                  >
+                                                    <button
+                                                      type="button"
+                                                      className="btn"
+                                                      onClick={() => {
+                                                        localStorage.setItem(
+                                                          "selected-content-name",
+                                                          singleContent.name
+                                                        );
+                                                        // navigate(
+                                                        //   `/action-plans/${item._id}/${singleCategory._id}/${singleContent._id}`
+                                                        // );
+                                                      }}
+                                                    >
+                                                      <span className="hoverLink fw-bold d-flex align-items-center">
+                                                        <input
+                                                          class="form-check-input mt-0"
+                                                          style={{
+                                                            marginRight:
+                                                              "0.5rem",
+                                                          }}
+                                                          defaultChecked={
+                                                            singleContent.checked
+                                                          }
+                                                          type="checkbox"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                          }}
+                                                          onChange={(e) => {
+                                                            e.stopPropagation();
+
+                                                            dispatch(
+                                                              markPointer({
+                                                                checked:
+                                                                  e.target
+                                                                    .checked,
+                                                                contentId:
+                                                                  singleContent._id,
+                                                              })
+                                                            );
+                                                          }}
+                                                        />
+
+                                                        <span className="fw-bold hoverLink">
+                                                          {singleContent.name}
+                                                        </span>
+                                                      </span>
+
+                                                      {/* <span
+                                                    className="title-6"
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      e.preventDefault();
+                                                    }}
+                                                  >
+                                                    {hasPermission_create_actionPlans() ? (
+                                                      <div class="dropdown">
+                                                        <i
+                                                          class="bi bi-three-dots-vertical custom-more-icon-hover-effect"
+                                                          data-bs-toggle="dropdown"
+                                                        ></i>
+
+                                                        <ul class="dropdown-menu">
+                                                          <li className="border-bottom p-0">
+                                                            <a
+                                                              data-bs-toggle="modal"
+                                                              data-bs-target="#CreateNewPointerDialog"
+                                                              class="dropdown-item"
+                                                              onClick={() => {
+                                                                dispatch(
+                                                                  updateSelectedActionPlan(
+                                                                    item
+                                                                  )
+                                                                );
+                                                                // dispatch(updateselectedCategory(singleCategory));
+                                                                // dispatch(updateselectedPointer(singleContent));
+                                                              }}
+                                                            >
+                                                              Edit
+                                                            </a>
+                                                          </li>
+
+                                                          <li className="border-bottom p-0">
+                                                            <a
+                                                              data-bs-toggle="modal"
+                                                              data-bs-target="#DeletePointerDialog"
+                                                              class="dropdown-item"
+                                                              onClick={() => {
+                                                                dispatch(
+                                                                  updateSelectedActionPlan(
+                                                                    item
+                                                                  )
+                                                                );
+                                                                // dispatch(updateselectedCategory(singleCategory));
+                                                                // dispatch(updateselectedPointer(singleContent));
+                                                              }}
+                                                            >
+                                                              Delete
+                                                            </a>
+                                                          </li>
+                                                        </ul>
+                                                      </div>
+                                                    ) : (
+                                                      <div></div>
+                                                    )}
+                                                  </span> */}
+                                                    </button>
+                                                    {/* <Collapse
+                                                      isOpened={
+                                                        singleContent.isOpened
+                                                      }
+                                                    >
+                                                      <div
+                                                        style={{
+                                                          paddingLeft: "0.8rem",
+                                                        }}
+                                                        dangerouslySetInnerHTML={{
+                                                          __html:
+                                                            singleContent.data,
+                                                        }}
+                                                      ></div>
+                                                    </Collapse> */}
+                                                  </div>
+                                                )
+                                              )}
+                                              {/* </ReactSortable> */}
+                                            </div>
+                                            {/* <div
+                                          style={{
+                                            marginBottom: "0.5rem",
+                                            marginTop: "0.5rem",
+                                            cursor: "pointer",
+                                            paddingLeft: "1.6rem",
+                                          }}
+                                          className="text-primary"
+                                        >
+                                          <a
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#CreateNewPointerDialog"
+                                            onClick={() => {
+                                              // dispatch(updateSelectedActionPlan(item));
+                                              // dispatch(updateselectedCategory(singleCategory));
+                                            }}
+                                          >
+                                            Add Pointer{" "}
+                                            <i className="fa fa-plus" />
+                                          </a>
+                                        </div> */}
+                                          </div>
+                                        </div>
+                                      </Collapse>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </Collapse>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <CreateNewActionPlanDialog />
+      <ManageActionPlanAccessDialog />
+      <DeleteActionPlanDialog />
+
+      <CreateNewCategoryDialog />
+      <DeleteCategoryDialog />
+
+      <CreateNewPointerDialog />
+      <DeletePointerDialog />
+    </>
+  );
+}
+
+export default ActionPlan;

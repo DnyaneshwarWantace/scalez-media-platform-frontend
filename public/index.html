@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" id="favicon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Web site created using create-react-app" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <script src="%PUBLIC_URL%/static/js/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+      integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <title>Scalez</title>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script src="%PUBLIC_URL%/static/js/custom.js"></script>
+
+    <script type="text/javascript">
+      /* exported gapiLoaded */
+      /* exported gisLoaded */
+      /* exported handleAuthClick */
+      /* exported handleSignoutClick */
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      const SCOPES = "https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/spreadsheets.readonly";
+
+      // TODO(developer): Set to client ID and API key from the Developer Console
+      const CLIENT_ID = "575611219896-qprf6tiiuicdi46ftcm1l9tgiv9tuaer.apps.googleusercontent.com";
+      const API_KEY = "AIzaSyCOu0XNDZpsWdWJP7hG_dNmNU8QmDb29XY";
+      const DISCOVERY_DOC = "https://sheets.googleapis.com/$discovery/rest?version=v4";
+
+      // TODO(developer): Replace with your own project number from console.developers.google.com.
+      const APP_ID = "669275794266";
+
+      let tokenClient;
+      let accessToken = null;
+      let pickerInited = false;
+      let gisInited = false;
+
+      // Add missing buttons if they don't exist
+      if (!document.getElementById("authorize_button")) {
+        const authorizeBtn = document.createElement("button");
+        authorizeBtn.id = "authorize_button";
+        authorizeBtn.style.display = "none";
+        document.body.appendChild(authorizeBtn);
+      }
+      if (!document.getElementById("signout_button")) {
+        const signoutBtn = document.createElement("button");
+        signoutBtn.id = "signout_button";
+        signoutBtn.style.display = "none";
+        document.body.appendChild(signoutBtn);
+      }
+      
+      document.getElementById("authorize_button").style.visibility = "hidden";
+      document.getElementById("signout_button").style.visibility = "hidden";
+
+      /**
+       * Callback after api.js is loaded.
+       */
+      function gapiLoaded() {
+        gapi.load("client:picker", intializePicker);
+      }
+
+      /**
+       * Callback after the API client is loaded. Loads the
+       * discovery doc to initialize the API.
+       */
+      async function intializePicker() {
+        await gapi.client.load("https://www.googleapis.com/discovery/v1/apis/drive/v3/rest");
+        await gapi.client.load("https://sheets.googleapis.com/$discovery/rest?version=v4");
+        pickerInited = true;
+        maybeEnableButtons();
+      }
+
+      /**
+       * Callback after Google Identity Services are loaded.
+       */
+      function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: "", // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+      }
+
+      /**
+       * Enables user interaction after all libraries are loaded.
+       */
+      function maybeEnableButtons() {
+        if (pickerInited && gisInited) {
+          document.getElementById("authorize_button").style.visibility = "visible";
+        }
+      }
+
+      /**
+       *  Sign in the user upon button click.
+       */
+      function handleAuthClick() {
+        tokenClient.callback = async (response) => {
+          if (response.error !== undefined) {
+            throw response;
+          }
+          accessToken = response.access_token;
+          document.getElementById("signout_button").style.visibility = "visible";
+          document.getElementById("authorize_button").innerText = "Refresh";
+          await createPicker();
+        };
+
+        if (accessToken === null) {
+          // Prompt the user to select a Google Account and ask for consent to share their data
+          // when establishing a new session.
+          tokenClient.requestAccessToken({ prompt: "consent" });
+        } else {
+          // Skip display of account chooser and consent dialog for an existing session.
+          tokenClient.requestAccessToken({ prompt: "" });
+        }
+      }
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick() {
+        if (accessToken) {
+          accessToken = null;
+          google.accounts.oauth2.revoke(accessToken);
+          document.getElementById("content").innerText = "";
+          document.getElementById("authorize_button").innerText = "Authorize";
+          document.getElementById("signout_button").style.visibility = "hidden";
+        }
+      }
+
+      /**
+       *  Create and render a Picker object for searching images.
+       */
+      function createPicker() {
+        const view = new google.picker.View(google.picker.ViewId.DOCS);
+        // view.setMimeTypes("application/*");
+        const picker = new google.picker.PickerBuilder()
+          .enableFeature(google.picker.Feature.NAV_HIDDEN)
+          .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+          .setDeveloperKey(API_KEY)
+          .setAppId(APP_ID)
+          .setOAuthToken(accessToken)
+          .addView(view)
+          .addView(new google.picker.DocsUploadView())
+          .setCallback(window.pickerCallback)
+          .build();
+        picker.setVisible(true);
+      }
+
+      /**
+       * Displays the file details of the user's selection.
+       * @param {object} data - Containers the user selection from the picker
+       */
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  </body>
+</html>

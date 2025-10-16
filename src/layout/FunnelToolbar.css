@@ -1,0 +1,7 @@
+.ProjectsMenu {
+  cursor: pointer;
+}
+
+.ProjectsMenu:hover {
+  background-color: #e3e3e3;
+}
