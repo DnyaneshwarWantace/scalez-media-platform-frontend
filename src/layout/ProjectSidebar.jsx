@@ -53,7 +53,7 @@ function ProjectSidebar() {
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={navigateToProjects}
-            className="p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-transparent hover:border-transparent"
+            className="p-0 h-auto flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-transparent hover:border-transparent no-underline"
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="text-sm">Projects</span>
@@ -80,7 +80,7 @@ function ProjectSidebar() {
               key={menu.name}
               to={menu.link}
               onClick={() => onSelectedMenu(menu.name)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors relative ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors relative no-underline ${
                 active
                   ? 'bg-gray-100 dark:bg-gray-800 text-foreground font-medium border-l-2 border-l-black dark:border-l-white'
                   : 'text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800'

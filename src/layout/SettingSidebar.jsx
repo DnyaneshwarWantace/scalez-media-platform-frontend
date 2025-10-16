@@ -44,7 +44,7 @@ function SettingSidebar() {
               key={menu.name}
               to={menu.link}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors relative",
+                "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors relative no-underline",
                 isActive(menu.link)
                   ? "bg-gray-100 dark:bg-gray-800 text-foreground font-medium border-l-2 border-l-black dark:border-l-white"
                   : "text-muted-foreground hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
