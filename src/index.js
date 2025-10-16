@@ -16,20 +16,11 @@ import Chart from "chart.js/auto";
 // Global error handlers
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
-  // Don't prevent default for Socket.IO errors, just log them
-  if (event.reason && event.reason.message && event.reason.message.includes('socket')) {
-    console.warn('Socket.IO error caught and handled:', event.reason.message);
-  } else {
-    event.preventDefault();
-  }
+  event.preventDefault();
 });
 
 window.addEventListener('error', (event) => {
   console.error('Global error:', event.error);
-  // Handle WebSocket errors gracefully
-  if (event.error && event.error.message && event.error.message.includes('WebSocket')) {
-    console.warn('WebSocket error caught and handled:', event.error.message);
-  }
 });
 
 const container = document.getElementById("root");

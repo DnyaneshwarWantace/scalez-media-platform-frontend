@@ -5,8 +5,8 @@ let tempFrontEndURL = "http://localhost:3005";
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
   console.log("dev");
 } else {
-  tempbackendServerBaseURL = "https://api.scalez.in";
-  tempsocketURL = "https://api.scalez.in";
+  tempbackendServerBaseURL = "http://scalez.in:8807";
+  tempsocketURL = "http://scalez.in:8807";
   tempFrontEndURL = "https://app.scalez.in";
 }
 
