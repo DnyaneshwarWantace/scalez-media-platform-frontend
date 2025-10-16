@@ -46,16 +46,17 @@ function RequestIdeaDialog() {
   const { errors, touched, handleSubmit, isSubmitting, getFieldProps, values } = formik;
 
   const addTeamMember = (teamMember) => {
+    if (!teamMember) return;
     console.log(selectedTeamMembers);
     let uniqueItems = [...new Set(selectedTeamMembers.concat([teamMember]))];
     setselectedTeamMembers(uniqueItems);
   };
 
-  const removeSelectedTeamMember = (id) => {
-    console.log(id);
+  const removeSelectedTeamMember = (teamMemberToRemove) => {
+    console.log(teamMemberToRemove);
     let tempTM = [];
     selectedTeamMembers.map((tm, index) => {
-      if (tm != id) {
+      if (tm && tm !== teamMemberToRemove) {
         tempTM.push(tm);
       }
     });
