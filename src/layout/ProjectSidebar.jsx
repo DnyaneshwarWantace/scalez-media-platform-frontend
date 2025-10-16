@@ -88,7 +88,7 @@ function ProjectSidebar() {
             >
               <Icon className="h-4 w-4" />
               {menu.name}
-            </Link>
+            </Link>//hg
           );
         })}
       </nav>
