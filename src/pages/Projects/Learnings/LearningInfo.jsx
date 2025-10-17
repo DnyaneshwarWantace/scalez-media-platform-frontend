@@ -37,7 +37,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import { Edit3, Users, TestTube2 } from "lucide-react";
+import { 
+  Edit3, 
+  Users, 
+  TestTube2,
+  Plus,
+  BarChart3,
+  Bell,
+  Edit,
+  Trash2,
+  Play,
+  UserPlus,
+  Settings,
+  Activity,
+  MessageSquare,
+  Target,
+  TrendingUp,
+  Star,
+  CheckCircle,
+  BookOpen
+} from "lucide-react";
 
 function LearningInfo() {
   const dispatch = useDispatch();
@@ -63,6 +82,134 @@ function LearningInfo() {
       setShowLoader(false);
     }, 2000);
   }, []);
+
+  // Function to generate comprehensive activity data for learnings
+  const generateLearningActivities = () => {
+    const activities = [];
+
+    // Add comments as activities
+    if (singleLearningInfo?.comments) {
+      singleLearningInfo.comments.forEach(comment => {
+        activities.push({
+          id: `comment-${comment._id}`,
+          type: 'comment',
+          user: comment.createdBy,
+          action: 'commented',
+          description: comment.comment,
+          timestamp: comment.createdAt,
+          icon: MessageSquare,
+          color: 'text-blue-600'
+        });
+      });
+    }
+
+    // Add learning creation activity
+    if (singleLearningInfo?.createdAt) {
+      activities.push({
+        id: `learning-created-${singleLearningInfo._id}`,
+        type: 'learning_created',
+        user: singleLearningInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'created learning',
+        description: singleLearningInfo.name,
+        timestamp: singleLearningInfo.createdAt,
+        icon: BookOpen,
+        color: 'text-green-600'
+      });
+    }
+
+    // Add learning updates activity
+    if (singleLearningInfo?.updatedAt && singleLearningInfo.updatedAt !== singleLearningInfo.createdAt) {
+      activities.push({
+        id: `learning-updated-${singleLearningInfo._id}`,
+        type: 'learning_updated',
+        user: singleLearningInfo.updatedBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated learning',
+        description: 'Learning details were modified',
+        timestamp: singleLearningInfo.updatedAt,
+        icon: Edit3,
+        color: 'text-orange-600'
+      });
+    }
+
+    // Add ICE score updates as activities
+    if (singleLearningInfo?.impact || singleLearningInfo?.confidence || singleLearningInfo?.ease) {
+      activities.push({
+        id: `ice-update-${singleLearningInfo._id}`,
+        type: 'ice_update',
+        user: singleLearningInfo.updatedBy || singleLearningInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated ICE score',
+        description: `Impact: ${singleLearningInfo.impact || 0}, Confidence: ${singleLearningInfo.confidence || 0}, Ease: ${singleLearningInfo.ease || 0}`,
+        timestamp: singleLearningInfo.updatedAt || singleLearningInfo.createdAt,
+        icon: BarChart3,
+        color: 'text-green-600'
+      });
+    }
+
+    // Add result/conclusion updates as activities
+    if (singleLearningInfo?.result) {
+      activities.push({
+        id: `result-update-${singleLearningInfo._id}`,
+        type: 'result_update',
+        user: singleLearningInfo.updatedBy || singleLearningInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated result',
+        description: `Result: ${singleLearningInfo.result}`,
+        timestamp: singleLearningInfo.updatedAt || singleLearningInfo.createdAt,
+        icon: CheckCircle,
+        color: 'text-purple-600'
+      });
+    }
+
+    // Add task completions as activities
+    if (singleLearningInfo?.tasks) {
+      singleLearningInfo.tasks.forEach((task, index) => {
+        if (task.status) {
+          activities.push({
+            id: `task-completed-${singleLearningInfo._id}-${index}`,
+            type: 'task_completed',
+            user: singleLearningInfo.updatedBy || singleLearningInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+            action: 'completed task',
+            description: task.name,
+            timestamp: singleLearningInfo.updatedAt || singleLearningInfo.createdAt,
+            icon: CheckCircle,
+            color: 'text-green-600'
+          });
+        }
+      });
+    }
+
+    // Add member assignments as activities
+    if (singleLearningInfo?.assignedTo && singleLearningInfo.assignedTo.length > 0) {
+      singleLearningInfo.assignedTo.forEach((member, index) => {
+        activities.push({
+          id: `member-assigned-${singleLearningInfo._id}-${index}`,
+          type: 'member_assigned',
+          user: singleLearningInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+          action: 'assigned member',
+          description: `${member.firstName} ${member.lastName}`,
+          timestamp: singleLearningInfo.createdAt,
+          icon: UserPlus,
+          color: 'text-purple-600'
+        });
+      });
+    }
+
+    // Add conclusion updates as activities
+    if (singleLearningInfo?.conclusion) {
+      activities.push({
+        id: `conclusion-update-${singleLearningInfo._id}`,
+        type: 'conclusion_update',
+        user: singleLearningInfo.updatedBy || singleLearningInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated conclusion',
+        description: 'Learning conclusion was modified',
+        timestamp: singleLearningInfo.updatedAt || singleLearningInfo.createdAt,
+        icon: BookOpen,
+        color: 'text-indigo-600'
+      });
+    }
+
+    // Sort activities by timestamp (newest first)
+    return activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  };
 
   return (
     <div className="space-y-6">
@@ -396,7 +543,7 @@ function LearningInfo() {
                         <TableCell className="text-sm">{singleLearningInfo?.goal?.name || 'No goal assigned'}</TableCell>
                         <TableCell className="text-sm">{singleLearningInfo?.keymetric?.name || 'No metric assigned'}</TableCell>
                         <TableCell>
-                          <Badge className="bg-black text-white hover:bg-black text-xs">
+                          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 text-xs">
                             {singleLearningInfo?.lever || "Not Defined"}
                           </Badge>
                         </TableCell>
@@ -667,10 +814,54 @@ function LearningInfo() {
                 </div>
               )}
             </div>
+
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Activity Card */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium">Recent Activity</h3>
+                  <Badge className="bg-gray-100 text-gray-800 text-xs">
+                    {generateLearningActivities().length}
+                  </Badge>
+                </div>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {generateLearningActivities().slice(0, 10).map((activity) => {
+                    const IconComponent = activity.icon;
+                    return (
+                      <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                        <div className="relative">
+                          <img
+                            src={`${backendServerBaseURL}/${activity.user?.avatar}`}
+                            className="w-6 h-6 rounded-full flex-shrink-0"
+                            alt=""
+                          />
+                          <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-white border border-gray-200 flex items-center justify-center`}>
+                            <IconComponent className={`w-2 h-2 ${activity.color}`} />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm leading-tight m-0">
+                            <span className="font-medium">{activity.user?.firstName} {activity.user?.lastName}</span> {activity.action}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate leading-tight m-0 mt-1" title={activity.description}>
+                            {activity.description}
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-tight m-0 mt-1">{moment(activity.timestamp).fromNow()}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {generateLearningActivities().length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Edit Learning Card */}
             <Card>
               <CardContent className="p-4">

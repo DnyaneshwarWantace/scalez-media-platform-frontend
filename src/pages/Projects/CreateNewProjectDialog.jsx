@@ -61,7 +61,7 @@ function CreateNewProjectDialog({ isOpen = false, onClose }) {
   const removeSelectedTeamMember = (data) => {
     let tempTM = [];
     selectedTeamMembers.map((tm, index) => {
-      if (tm.id != data.id) {
+      if ((tm.id || tm._id) != (data.id || data._id)) {
         tempTM.push(tm);
       }
     });
@@ -144,7 +144,7 @@ function CreateNewProjectDialog({ isOpen = false, onClose }) {
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {selectedTeamMembers?.slice(0, numberOfTeamMembersToShowInSelect).map((teamMember) => (
-                        <Badge key={teamMember.id} variant="secondary" className="flex items-center gap-2 px-3 py-1">
+                        <Badge key={teamMember.id || teamMember._id} className="bg-gray-100 text-gray-800 flex items-center gap-2 px-3 py-1">
                           <img
                             src={`${backendServerBaseURL}/${teamMember.avatar}`}
                             alt=""
@@ -196,8 +196,8 @@ function CreateNewProjectDialog({ isOpen = false, onClose }) {
                     </SelectItem>
                     {users?.map((teamMember) => (
                       <SelectItem
-                        key={teamMember.id}
-                        value={teamMember.id}
+                        key={teamMember.id || teamMember._id}
+                        value={teamMember.id || teamMember._id}
                         onClick={() => {
                           addTeamMember(teamMember);
                           setIsTeamDropdownOpen(false);

@@ -4,7 +4,6 @@ import { getAnayticsData, selectanayticsData, updatespan, ideaTestData } from ".
 import { formatDate2, formatTime } from "../../utils/formatTime";
 import { CSVLink } from "react-csv";
 import { backendServerBaseURL } from "../../utils/backendServerBaseURL";
-import Spinner from "../../components/common/Spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
@@ -19,7 +18,6 @@ function Analytics() {
   const ideaTest = useSelector(ideaTestData);
   const [csvData, setcsvData] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showLoader, setShowLoader] = useState(true);
 
   const handleMouseEnter = () => {
     setShowDropdown(true);
@@ -306,9 +304,6 @@ function Analytics() {
 
   useEffect(() => {
     dispatch(getAnayticsData());
-    setTimeout(() => {
-      setShowLoader(false); 
-    }, 2000);
   }, [selectedMenu]);
 
   useEffect(() => {
@@ -354,11 +349,6 @@ function Analytics() {
 
   return (
     <div className="min-h-screen bg-background">
-      {showLoader && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-          <Spinner />
-        </div>
-      )}
 
       <div className="container mx-auto py-6">
         {/* Header Section */}
@@ -408,8 +398,8 @@ function Analytics() {
                   <p className="text-sm font-medium text-muted-foreground mb-1">Active Projects</p>
                   <h3 className="text-4xl font-bold">{analyticsData?.length || 0}</h3>
                 </div>
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Activity className="h-6 w-6 text-white" />
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Activity className="h-6 w-6 text-gray-800" />
                 </div>
               </div>
             </CardContent>
@@ -423,8 +413,8 @@ function Analytics() {
                   <p className="text-sm font-medium text-muted-foreground mb-1">Active Goals</p>
                   <h3 className="text-4xl font-bold">{countAllGoals()}</h3>
                 </div>
-                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
-                  <Target className="h-6 w-6 text-white" />
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Target className="h-6 w-6 text-gray-800" />
                 </div>
               </div>
             </CardContent>
@@ -465,8 +455,8 @@ function Analytics() {
                   </div>
                   <h3 className="text-4xl font-bold">{learingAcquired()}</h3>
                 </div>
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                  <Award className="h-6 w-6 text-white" />
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Award className="h-6 w-6 text-gray-800" />
                 </div>
               </div>
             </CardContent>
@@ -595,11 +585,15 @@ function Analytics() {
                       <TableCell className="font-medium">{singleProject?.name}</TableCell>
                       <TableCell>
                         <Badge 
-                          variant={
-                            singleProject.status === "Active" ? "default" :
-                            singleProject.status === "Completed" ? "secondary" :
-                            singleProject.status === "On Hold" ? "outline" : "secondary"
-                          }
+                          className={`${
+                            singleProject.status === "Active" || singleProject.status === "Completed"
+                              ? "bg-black text-white"
+                              : singleProject.status === "On Hold"
+                              ? "bg-gray-100 text-black"
+                              : singleProject.status === "Not Defined"
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-gray-100 text-gray-800"
+                          } text-xs`}
                         >
                           {singleProject.status}
                         </Badge>

@@ -226,71 +226,76 @@ function FunnelDashboard() {
     setNodes,
     singleEdgeData
   ) => {
-    let targetNode = nodes.filter((singleNode) => singleNode.id === nodeId)[0];
+    try {
+      let targetNode = nodes.filter((singleNode) => singleNode.id === nodeId)[0];
 
-    if (!targetNode) {
-      return;
+      if (!targetNode) {
+        return;
+      }
+
+      let updatedNodes = await calculator.getUpdatedNodes(
+        nodes,
+        parentId,
+        singleEdgeData,
+        calculator.reverseTraverse,
+        targetNode
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await Promise.allSettled(
+        targetNode?.outgoingEdges
+          ?.filter((e) => e.sourceHandle == "yes_handle")
+          ?.map(async (singleEdge, index) => {
+            updatedNodes = await traverseGraph(
+              singleEdge.target,
+              updatedNodes,
+              targetNode.id,
+              setNodes,
+              singleEdge
+            );
+
+            console.log(targetNode?.data?.name);
+            console.log(updatedNodes);
+          })
+      );
+
+      setNodes((nodes) => updatedNodes);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await Promise.allSettled(
+        targetNode?.outgoingEdges
+          ?.filter((e) => e.sourceHandle == "no_handle")
+          ?.map(async (singleEdge, index) => {
+            updatedNodes = await traverseGraph(
+              singleEdge.target,
+              updatedNodes,
+              targetNode.id,
+              setNodes,
+              singleEdge
+            );
+
+            console.log(targetNode?.data?.name);
+            console.log(updatedNodes);
+          })
+      );
+
+      settotalTraffic(await calculator.getTotalTraffic(updatedNodes));
+
+      settotalLeads(await calculator.getTotalLeads(updatedNodes));
+
+      setaverageCPC(await calculator.getAverageCPC(updatedNodes));
+
+      setNodes((nodes) => updatedNodes);
+
+      simulate(updatedNodes);
+
+      return updatedNodes;
+    } catch (error) {
+      console.error("Error in traverseGraph:", error);
+      throw error;
     }
-
-    let updatedNodes = await calculator.getUpdatedNodes(
-      nodes,
-      parentId,
-      singleEdgeData,
-      calculator.reverseTraverse,
-      targetNode
-    );
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    await Promise.allSettled(
-      targetNode?.outgoingEdges
-        ?.filter((e) => e.sourceHandle == "yes_handle")
-        ?.map(async (singleEdge, index) => {
-          updatedNodes = await traverseGraph(
-            singleEdge.target,
-            updatedNodes,
-            targetNode.id,
-            setNodes,
-            singleEdge
-          );
-
-          console.log(targetNode?.data?.name);
-          console.log(updatedNodes);
-        })
-    );
-
-    setNodes((nodes) => updatedNodes);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    await Promise.allSettled(
-      targetNode?.outgoingEdges
-        ?.filter((e) => e.sourceHandle == "no_handle")
-        ?.map(async (singleEdge, index) => {
-          updatedNodes = await traverseGraph(
-            singleEdge.target,
-            updatedNodes,
-            targetNode.id,
-            setNodes,
-            singleEdge
-          );
-
-          console.log(targetNode?.data?.name);
-          console.log(updatedNodes);
-        })
-    );
-
-    settotalTraffic(await calculator.getTotalTraffic(updatedNodes));
-
-    settotalLeads(await calculator.getTotalLeads(updatedNodes));
-
-    setaverageCPC(await calculator.getAverageCPC(updatedNodes));
-
-    setNodes((nodes) => updatedNodes);
-
-    simulate(updatedNodes);
-
-    return updatedNodes;
   };
 
   useEffect(() => {
@@ -649,28 +654,36 @@ function FunnelDashboard() {
   }, [singleProject]);
 
   const deleteproduct = async () => {
-    const response = await axiosInstance.delete(
-      `${backendServerBaseURL}/api/v1/funnel-project/${projectId}/scenario/${scenarioId}/products/${selectedProduct._id}`,
-      {}
-    );
+    try {
+      const response = await axiosInstance.delete(
+        `${backendServerBaseURL}/api/v1/funnel-project/${projectId}/scenario/${scenarioId}/products/${selectedProduct._id}`,
+        {}
+      );
 
-    if (response.status == 200) {
-      dispatch(getSingleProject({ setNodes, setEdges, projectId }));
-      closeCreateProductsModalRef.current.click();
-      productsModalRef.current.click();
+      if (response.status == 200) {
+        dispatch(getSingleProject({ setNodes, setEdges, projectId }));
+        closeCreateProductsModalRef.current.click();
+        productsModalRef.current.click();
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
     }
   };
 
   const deleteExpense = async () => {
-    const response = await axiosInstance.delete(
-      `${backendServerBaseURL}/api/v1/funnel-project/${projectId}/expense/${selectedExpense._id}`,
-      {}
-    );
+    try {
+      const response = await axiosInstance.delete(
+        `${backendServerBaseURL}/api/v1/funnel-project/${projectId}/expense/${selectedExpense._id}`,
+        {}
+      );
 
-    if (response.status == 200) {
-      dispatch(getSingleProject({ setNodes, setEdges, projectId }));
-      closeCreateProductsModalRef.current.click();
-      productsModalRef.current.click();
+      if (response.status == 200) {
+        dispatch(getSingleProject({ setNodes, setEdges, projectId }));
+        closeCreateProductsModalRef.current.click();
+        productsModalRef.current.click();
+      }
+    } catch (error) {
+      console.error("Error deleting expense:", error);
     }
   };
 
@@ -884,7 +897,7 @@ function FunnelDashboard() {
                         data-bs-toggle="modal"
                         data-bs-target={`#productsModal`}
                       >
-                        <i class="fa-solid fa-gear"></i>
+                        <i className="fa-solid fa-gear"></i>
                       </div>
                     </div>
                   </div>
@@ -906,7 +919,7 @@ function FunnelDashboard() {
                     })
                     .map((singleProduct) => {
                       return (
-                        <div className="d-flex justify-content-between w-100">
+                        <div key={singleProduct._id || singleProduct.name} className="d-flex justify-content-between w-100">
                           <p>{singleProduct.name}</p>
                           <p
                             style={{ minWidth: "3.5rem" }}
@@ -966,7 +979,7 @@ function FunnelDashboard() {
                   {nodes.map((singleNode) => {
                     if (singleNode.type == "TrafficEntry") {
                       return (
-                        <div className="d-flex justify-content-between w-100">
+                        <div key={singleNode.id} className="d-flex justify-content-between w-100">
                           <p>{singleNode.data.name}</p>
                           <p
                             style={{ minWidth: "3.5rem" }}
@@ -1016,7 +1029,7 @@ function FunnelDashboard() {
                         data-bs-toggle="modal"
                         data-bs-target={`#expensesModal`}
                       >
-                        <i class="fa-solid fa-gear"></i>
+                        <i className="fa-solid fa-gear"></i>
                       </div>
                     </div>
                   </div>
@@ -1055,7 +1068,7 @@ function FunnelDashboard() {
                     ?.find((s) => s._id == scenarioId)
                     ?.expenses?.map((singleExpense) => {
                       return (
-                        <div className="d-flex justify-content-between w-100">
+                        <div key={singleExpense._id || singleExpense.expenseName} className="d-flex justify-content-between w-100">
                           <p>{singleExpense.expenseName}</p>
                           <p
                             style={{ minWidth: "3.5rem" }}
@@ -1255,31 +1268,36 @@ function FunnelDashboard() {
                   className="btn btn-primary w-100 btn-lg mt-3"
                   disabled={simulateLoading}
                   onClick={async () => {
-                    setsimulateLoading(true);
-                    console.log(nodes);
-                    console.log(edges);
+                    try {
+                      setsimulateLoading(true);
+                      console.log(nodes);
+                      console.log(edges);
 
-                    // Get all traffic sources
-                    const trafficSources = nodesWithEdges.filter(
-                      (singleNode) => {
-                        return singleNode.type === "TrafficEntry";
-                      }
-                    );
-                    console.log(trafficSources);
+                      // Get all traffic sources
+                      const trafficSources = nodesWithEdges.filter(
+                        (singleNode) => {
+                          return singleNode.type === "TrafficEntry";
+                        }
+                      );
+                      console.log(trafficSources);
 
-                    // Traverse
-                    await Promise.all(
-                      trafficSources.map(async (singleTrafficSource) => {
-                        await traverseGraph(
-                          singleTrafficSource.id,
-                          nodesWithEdges,
-                          null,
-                          setNodes
-                        );
-                      })
-                    );
+                      // Traverse
+                      await Promise.all(
+                        trafficSources.map(async (singleTrafficSource) => {
+                          await traverseGraph(
+                            singleTrafficSource.id,
+                            nodesWithEdges,
+                            null,
+                            setNodes
+                          );
+                        })
+                      );
 
-                    setsimulateLoading(false);
+                      setsimulateLoading(false);
+                    } catch (error) {
+                      console.error("Error in simulate function:", error);
+                      setsimulateLoading(false);
+                    }
                   }}
                 >
                   Simulate
@@ -1332,7 +1350,7 @@ function FunnelDashboard() {
             </div>
             <div className="modal-body p-0 m-0 p-3">
               {/* Write demo table */}
-              <table class="table">
+              <table className="table">
                 <thead>
                   <tr>
                     <th scope="col">Expense Name</th>
@@ -1347,7 +1365,7 @@ function FunnelDashboard() {
                     ?.find((s) => s._id == scenarioId)
                     ?.expenses?.map((singleExpense) => {
                       return (
-                        <tr>
+                        <tr key={singleExpense._id || singleExpense.expenseName}>
                           <td>{singleExpense.expenseName}</td>
                           <td>
                             {convertBillingDaysToText(
@@ -1368,7 +1386,7 @@ function FunnelDashboard() {
                                 data-bs-toggle="modal"
                                 data-bs-target={`#createExpenseModal`}
                               >
-                                <i class="fa-solid fa-pen-to-square"></i>
+                                <i className="fa-solid fa-pen-to-square"></i>
                               </div>
 
                               <div
@@ -1382,7 +1400,7 @@ function FunnelDashboard() {
                                 data-bs-toggle="modal"
                                 data-bs-target={`#deleteExpenseModal`}
                               >
-                                <i class="fa-solid fa-trash"></i>
+                                <i className="fa-solid fa-trash"></i>
                               </div>
                             </div>
                           </td>
@@ -1514,7 +1532,7 @@ function FunnelDashboard() {
                         "Web Hosting",
                       ].map((expenseName) => {
                         return (
-                          <option value={expenseName}>{expenseName}</option>
+                          <option key={expenseName} value={expenseName}>{expenseName}</option>
                         );
                       })}
                     </select>
@@ -1548,7 +1566,7 @@ function FunnelDashboard() {
                           { name: "Yearly", value: 365 },
                         ].map((optionData) => {
                           return (
-                            <option value={optionData.value}>
+                            <option key={optionData.value} value={optionData.value}>
                               {optionData.name}
                             </option>
                           );
@@ -1641,7 +1659,7 @@ function FunnelDashboard() {
             </div>
             <div className="modal-body p-0 m-0 p-3">
               {/* Write demo table */}
-              <table class="table">
+              <table className="table">
                 <thead>
                   <tr>
                     <th scope="col">Name</th>
@@ -1658,7 +1676,7 @@ function FunnelDashboard() {
                     ?.find((s) => s._id === scenarioId)
                     ?.products?.map((singleProduct) => {
                       return (
-                        <tr>
+                        <tr key={singleProduct._id || singleProduct.name}>
                           <td>{singleProduct.name}</td>
                           <td>${singleProduct.price}</td>
                           <td>
@@ -1679,7 +1697,7 @@ function FunnelDashboard() {
                                 data-bs-toggle="modal"
                                 data-bs-target={`#createProductModal`}
                               >
-                                <i class="fa-solid fa-pen-to-square"></i>
+                                <i className="fa-solid fa-pen-to-square"></i>
                               </div>
 
                               <div
@@ -1693,7 +1711,7 @@ function FunnelDashboard() {
                                 data-bs-toggle="modal"
                                 data-bs-target={`#deleteProductModal`}
                               >
-                                <i class="fa-solid fa-trash"></i>
+                                <i className="fa-solid fa-trash"></i>
                               </div>
                             </div>
                           </td>
@@ -1908,7 +1926,7 @@ function FunnelDashboard() {
                           { name: "Videogames", value: "Videogames" },
                         ].map((optionData) => {
                           return (
-                            <option value={optionData.value}>
+                            <option key={optionData.value} value={optionData.value}>
                               {optionData.name}
                             </option>
                           );
@@ -1965,15 +1983,14 @@ function FunnelDashboard() {
                           {
                             name: "One-Time",
                             value: 0,
-                            selected: true,
                           },
-                          { name: "Monthly", value: 30, selected: false },
-                          { name: "Yearly", value: 365, selected: false },
+                          { name: "Monthly", value: 30 },
+                          { name: "Yearly", value: 365 },
                         ].map((optionData) => {
                           return (
                             <option
+                              key={optionData.value}
                               value={optionData.value}
-                              selected={optionData.selected}
                             >
                               {optionData.name}
                             </option>

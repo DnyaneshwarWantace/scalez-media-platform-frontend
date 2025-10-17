@@ -40,12 +40,12 @@ function DeleteWorkspaceDialog() {
               </div>
 
               <div className="hstack gap-2 d-flex justify-content-end">
-                <button type="button" class="btn btn-lg btn-outline-primary" data-bs-dismiss="modal" ref={closeRef}>
+                <button type="button" className="btn btn-lg btn-outline-primary" data-bs-dismiss="modal" ref={closeRef}>
                   Close
                 </button>
                 <button
                   type="submit"
-                  class="btn btn-lg btn-danger"
+                  className="btn btn-lg btn-danger"
                   data-bs-toggle="modal"
                   data-bs-target="#deleteKeyMetricModal"
                   disabled={btnState}

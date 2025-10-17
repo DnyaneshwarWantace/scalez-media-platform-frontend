@@ -13,15 +13,6 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 // NOTE: Don't remove, import Chart from "chart.js/auto";
 import Chart from "chart.js/auto";
 
-// Global error handlers
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
-  event.preventDefault();
-});
-
-window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error);
-});
 
 const container = document.getElementById("root");
 const root = createRoot(container);

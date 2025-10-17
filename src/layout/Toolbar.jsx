@@ -15,7 +15,7 @@ import {
 import { selectAllUsers } from "../redux/slices/settingSlice";
 import { backendServerBaseURL } from "../utils/backendServerBaseURL";
 import { formatTime } from "../utils/formatTime";
-import { Settings, FileText, LogOut, ChevronDown, User, BarChart3, FolderOpen, Activity, TrendingUp, Bell, Menu, X, Check } from "lucide-react";
+import { Settings, FileText, LogOut, ChevronDown, User, BarChart3, FolderOpen, Activity, TrendingUp, Bell, Menu, X, Check, Star } from "lucide-react";
 import ThemeToggle from "../components/ThemeToggle";
 import {
   DropdownMenu,
@@ -101,6 +101,10 @@ function Toolbar({ socket }) {
       name: "Analytics",
       link: "/analytics",
     },
+    {
+      name: "North Star",
+      link: "/north-star",
+    },
   ];
   const ProjectsMenus = [
     {
@@ -143,6 +147,10 @@ function Toolbar({ socket }) {
     if (location.pathname.includes("analytics")) {
       setselectedMenu("Analytics");
     }
+
+    if (location.pathname.includes("north-star")) {
+      setselectedMenu("North Star");
+    }
   }, [location.pathname]);
 
   useEffect(() => {
@@ -183,6 +191,7 @@ function Toolbar({ socket }) {
                   case 'Project': return FolderOpen;
                   case 'Models': return Activity;
                   case 'Analytics': return TrendingUp;
+                  case 'North Star': return Star;
                   default: return BarChart3;
                 }
               };
@@ -338,7 +347,7 @@ function Toolbar({ socket }) {
         <div className="fixed inset-0 z-50 bg-black/50" onClick={() => setIsNotificationOpen(false)}>
           <div className="fixed right-0 top-0 h-full w-96 bg-background border-l shadow-lg" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center justify-between p-2 border-b">
               <h3 className="text-lg font-semibold">Notifications</h3>
               <Button
                 variant="ghost"
@@ -350,7 +359,7 @@ function Toolbar({ socket }) {
             </div>
 
             {/* Filter Tabs */}
-            <div className="p-4 border-b">
+            <div className="p-1 border-b">
               <div className="flex space-x-1">
                 {ProjectsMenus.map((menu) => (
                   <Button
@@ -368,7 +377,7 @@ function Toolbar({ socket }) {
 
             {/* Notifications List */}
             <ScrollArea className="flex-1 h-[calc(100vh-140px)]">
-              <div className="p-4 space-y-3">
+              <div className="p-1 space-y-0">
                 {notifications?.length !== 0 ? (
                   notifications
                     .filter((noti) => {
@@ -378,8 +387,8 @@ function Toolbar({ socket }) {
                     })
                     .map((notification) => {
                       return notification?.audience?.includes(me?.id) ? (
-                        <div key={notification._id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                          <Avatar className="h-8 w-8">
+                        <div key={notification._id} className="flex items-start space-x-1 p-1 rounded hover:bg-muted/50 transition-colors">
+                          <Avatar className="h-5 w-5">
                             <AvatarImage src={`${backendServerBaseURL}/${me.avatar}`} />
                             <AvatarFallback>
                               {me?.firstName?.[0]}{me?.lastName?.[0]}
@@ -387,20 +396,20 @@ function Toolbar({ socket }) {
                           </Avatar>
                           
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-foreground">{notification.message}</p>
-                            <div className="flex items-center justify-between mt-2">
-                              <p className="text-xs text-muted-foreground">
-                                {formatTime(notification.createdAt)}
-                              </p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm text-foreground leading-none">{notification.message}</p>
+                                <p className="text-xs text-muted-foreground leading-none -mt-1">{formatTime(notification.createdAt)}</p>
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
                                   dispatch(markRead({ notificationId: notification._id }));
                                 }}
-                                className="h-6 w-6 p-0"
+                                className="h-4 w-4 p-0 flex-shrink-0"
                               >
-                                <Check className="h-3 w-3" />
+                                <Check className="h-2.5 w-2.5" />
                               </Button>
                             </div>
                           </div>
@@ -408,9 +417,9 @@ function Toolbar({ socket }) {
                       ) : null;
                     })
                 ) : (
-                  <div className="text-center py-8">
-                    <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No notifications yet</p>
+                  <div className="text-center py-2">
+                    <Bell className="h-6 w-6 text-muted-foreground mx-auto mb-1" />
+                    <p className="text-muted-foreground text-sm">No notifications yet</p>
                   </div>
                 )}
               </div>

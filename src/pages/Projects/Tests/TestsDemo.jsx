@@ -171,7 +171,7 @@ function TestsDemo() {
 
           <div className="hstack gap-2">
             <p className="m-0">0</p>
-            <i class="bi bi-chat"></i>
+            <i className="bi bi-chat"></i>
           </div>
         </div>
       </div>

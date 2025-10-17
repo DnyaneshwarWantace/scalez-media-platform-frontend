@@ -53,35 +53,50 @@ let projectNameData;
 
 // Projects
 export const getAllProjects = createAsyncThunk("project/getAllProjects", async (_, thunkAPI) => {
-  let config = {
-    params: {
-      search: thunkAPI.getState().project.projectSearch,
-      status: thunkAPI.getState().project.projectSelectedTab,
-    },
-  };
+  try {
+    let config = {
+      params: {
+        search: thunkAPI.getState().project.projectSearch,
+        status: thunkAPI.getState().project.projectSelectedTab,
+      },
+    };
 
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/project/read`, config);
-  // console.log("response --",response.data)
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/project/read`, config);
+    // console.log("response --",response.data)
 
-  if (response.status === 200 && response.data.message === "Projects retrieved successfully") {
-    thunkAPI.dispatch(updateProjects(response.data.projects));
-    localStorage.setItem("projectsData", JSON.stringify(response.data.projects));
+    if (response.status === 200 && response.data.message === "Projects retrieved successfully") {
+      thunkAPI.dispatch(updateProjects(response.data.projects));
+      localStorage.setItem("projectsData", JSON.stringify(response.data.projects));
+    }
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
 export const getAllUsers = createAsyncThunk("project/getAllUsers", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/management/readUsers`);
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/management/readUsers`);
 
-  if (response.status === 200 && response.data.message === "Users retrieved successfully") {
-    thunkAPI.dispatch(updateUsers(response.data.users));
+    if (response.status === 200 && response.data.message === "Users retrieved successfully") {
+      thunkAPI.dispatch(updateUsers(response.data.users));
+    }
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
 export const getAllRegisteredUsers = createAsyncThunk("project/getAllRegisteredUsers", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/management/readRegisteredUsers`);
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/management/readRegisteredUsers`);
 
-  if (response.status === 200 && response.data.message === "Users retrieved successfully") {
-    thunkAPI.dispatch(updateRegisteredUsers(response.data.users));
+    if (response.status === 200 && response.data.message === "Users retrieved successfully") {
+      thunkAPI.dispatch(updateRegisteredUsers(response.data.users));
+    }
+  } catch (error) {
+    console.error("Error fetching registered users:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
@@ -110,29 +125,31 @@ export const createProject = createAsyncThunk("project/createProject", async (pa
 });
 
 export const createMultipleProjects = createAsyncThunk("project/createMultipleProjects", async (payload, thunkAPI) => {
-  console.log('created a project :>> ', payload);
-  let response = await axios.post(`${backendServerBaseURL}/api/v1/project/createProjects`, payload);
+  try {
+    console.log('Creating multiple projects with payload:', payload);
+    let response = await axios.post(`${backendServerBaseURL}/api/v1/project/createProjects`, payload.projects || payload);
 
-  console.log('created project response :>> ', response.data);
+    console.log('Project creation response:', response.data);
 
-let sampleProjectIds = response.data.projects.map((x) => x._id);
-let sampleProjectName = response.data.projects.map((x) => x.name);
-projectNameData = sampleProjectName;
-console.log('projectNameData :>> ', projectNameData);
-console.log('sampleProjectName :>> ', sampleProjectName);
+    // Check if response has the expected structure
+    if (response.status === 201 && response.data.message === "Projects created successfully" && response.data.projects) {
+      let sampleProjectIds = response.data.projects.map((x) => x._id);
+      let sampleProjectName = response.data.projects.map((x) => x.name);
+      projectNameData = sampleProjectName;
+      console.log('Project IDs:', sampleProjectIds);
+      console.log('Project names:', sampleProjectName);
 
-  if (response.status === 201 && response.data.message === "Projects created successfully") {
-        thunkAPI.dispatch(getAllProjects());
-        thunkAPI.dispatch(updatepopupMessage("Sample data added"));
-        setTimeout(() => {
-        thunkAPI.dispatch(updatepopupMessage(null));}, 1000);
+      thunkAPI.dispatch(getAllProjects());
+      thunkAPI.dispatch(updatepopupMessage("Sample data added"));
+      setTimeout(() => {
+        thunkAPI.dispatch(updatepopupMessage(null));
+      }, 1000);
 
-      }
-        // console.log('sampleProjectIds :>> ', sampleProjectIds);
-        let userInfo = localStorage.getItem("userData", "");
-        let userDetails = JSON.parse(userInfo);
+      // Continue with goal creation logic
+      let userInfo = localStorage.getItem("userData", "");
+      let userDetails = JSON.parse(userInfo);
 
-        let goalSampleData = [];
+      let goalSampleData = [];
         // for (let i = 0; i < 3; i++) {  
 
           let obj1 = {
@@ -620,9 +637,18 @@ console.log('sampleProjectName :>> ', sampleProjectName);
           // }
         // }
   
-    thunkAPI.dispatch(createMultipleGoals(goalSampleData));
-    payload.closeModal();
-  
+      thunkAPI.dispatch(createMultipleGoals(goalSampleData));
+      if (payload.closeModal) {
+        payload.closeModal();
+      }
+    } else {
+      console.error('Unexpected response structure:', response.data);
+      throw new Error('Unexpected response from server');
+    }
+  } catch (error) {
+    console.error("Error creating multiple projects:", error);
+    return thunkAPI.rejectWithValue(error.message);
+  }
 });
 
 export const editProject = createAsyncThunk("project/editProject", async (payload, thunkAPI) => {
@@ -753,55 +779,59 @@ export const readAllGoals = createAsyncThunk("project/readAllGoals", async (payl
 });
 
 export const createGoal = createAsyncThunk("project/createGoal", async (payload, thunkAPI) => {
-  console.log('createGoal payload :>> ', payload);
-  const processedKeyMetrics = payload.keymetric ? payload.keymetric.map(
-    (km) =>
-      (km = {
-        name: km.name,
-        startValue: km.startValue,
-        targetValue: km.targetValue,
-      })
-  ) : payload.keyMetrics.map(
-    (km) =>
-      (km = {
-        name: km.keyMetric,
-        startValue: km.startValue,
-        targetValue: km.targetValue,
-      })
-  );
-  
-
-  let response = await axios.post(`${backendServerBaseURL}/api/v1/goal/create`, {
-    name: payload.name,
-    description: payload.description,
-    startDate: payload.startDate,
-    endDate: payload.endDate,
-    members: payload.members,
-    projectId: payload.projectId,
-    keymetric: processedKeyMetrics,
-    confidence: payload.confidence,
-  });
-
-
-  console.log('response createGoal:>> ', response.data);
-  if (response.status === 201 && response.data.message === "Goal created successfully") {
-
-    thunkAPI.dispatch(getAllGoals({ projectId: payload.projectId }));
-    payload.closeModal();
-    // payload.reset();
-    thunkAPI.dispatch(updateSelectedGoal(response.data.goal));
+  try {
+    console.log('createGoal payload :>> ', payload);
+    const processedKeyMetrics = payload.keymetric ? payload.keymetric.map(
+      (km) =>
+        (km = {
+          name: km.name,
+          startValue: km.startValue,
+          targetValue: km.targetValue,
+        })
+    ) : payload.keyMetrics.map(
+      (km) =>
+        (km = {
+          name: km.keyMetric,
+          startValue: km.startValue,
+          targetValue: km.targetValue,
+        })
+    );
     
-  
-    setTimeout(() => {
-      payload.openRequestIdeaDialog();
-    }, 1000);
-  
-}
 
+    let response = await axios.post(`${backendServerBaseURL}/api/v1/goal/create`, {
+      name: payload.name,
+      description: payload.description,
+      startDate: payload.startDate,
+      endDate: payload.endDate,
+      members: payload.members,
+      projectId: payload.projectId,
+      keymetric: processedKeyMetrics,
+      confidence: payload.confidence,
+    });
+
+
+    console.log('response createGoal:>> ', response.data);
+    if (response.status === 201 && response.data.message === "Goal created successfully") {
+
+      thunkAPI.dispatch(getAllGoals({ projectId: payload.projectId }));
+      payload.closeModal();
+      // payload.reset();
+      thunkAPI.dispatch(updateSelectedGoal(response.data.goal));
+      
+    
+      setTimeout(() => {
+        payload.openRequestIdeaDialog();
+      }, 1000);
+    }
+  } catch (error) {
+    console.error("Error creating goal:", error);
+    return thunkAPI.rejectWithValue(error.message);
+  }
 });
 
 
 export const createMultipleGoals = createAsyncThunk("project/createMultipleGoals", async (payload, thunkAPI) => {
+  try {
     let response = await axios.post(`${backendServerBaseURL}/api/v1/goal/createMultiple`, payload);
     if (response.status === 201 && response.data.message === "Goal created successfully") {
   console.log('payload 111:>> ', payload);
@@ -1114,8 +1144,13 @@ export const createMultipleGoals = createAsyncThunk("project/createMultipleGoals
      thunkAPI.dispatch(createMultipleIdeas(ideaSampleData));
 
 
-      payload.closeModal();
-  
+      if (payload.closeModal) {
+        payload.closeModal();
+      }
+  } catch (error) {
+    console.error("Error creating multiple goals:", error);
+    return thunkAPI.rejectWithValue(error.message);
+  }
 });
 
 export const updateGoal = createAsyncThunk("project/updateGoal", async (payload, thunkAPI) => {

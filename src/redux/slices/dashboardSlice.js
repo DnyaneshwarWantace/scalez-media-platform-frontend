@@ -39,50 +39,80 @@ export const updateWidgets = createAsyncThunk("dashboard/updateWidgets", async (
 
 // Dashboards
 export const readTasks = createAsyncThunk("dashboard/readTasks", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readTasks`);
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readTasks`);
 
-  if (response.status === 200 && response.data.message === "Tests fetched successfully") {
-    thunkAPI.dispatch(updatetasksAssigned(response.data.tasksAssigned));
-    thunkAPI.dispatch(updatetasksCompleted(response.data.tasksCompleted));
+    if (response.status === 200 && response.data.message === "Tests fetched successfully") {
+      thunkAPI.dispatch(updatetasksAssigned(response.data.tasksAssigned));
+      thunkAPI.dispatch(updatetasksCompleted(response.data.tasksCompleted));
+    }
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
 export const readCheckins = createAsyncThunk("dashboard/readCheckins", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readCheckins`);
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readCheckins`);
 
-  if (response.status === 200) {
-    thunkAPI.dispatch(updatecheckins(response.data.Checkins));
+    if (response.status === 200) {
+      thunkAPI.dispatch(updatecheckins(response.data.Checkins));
+    }
+  } catch (error) {
+    console.error("Error fetching checkins:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
 export const readLearnings = createAsyncThunk("dashboard/readLearnings", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readLearnings`);
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readLearnings`);
 
-  if (response.status === 200) {
-    thunkAPI.dispatch(updatelearningsData(response.data.learnings));
+    if (response.status === 200) {
+      thunkAPI.dispatch(updatelearningsData(response.data.learnings));
+    }
+  } catch (error) {
+    console.error("Error fetching learnings:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
 export const readIdeas = createAsyncThunk("dashboard/readIdeas", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readIdeas`);
-  if (response.status === 200) {
-    thunkAPI.dispatch(updateideasData(response.data.ideas));
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readIdeas`);
+    if (response.status === 200) {
+      thunkAPI.dispatch(updateideasData(response.data.ideas));
+    }
+  } catch (error) {
+    console.error("Error fetching ideas:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
 export const readGoals = createAsyncThunk("dashboard/readGoals", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readGoals`);
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readGoals`);
 
-  if (response.status === 200) {
-    thunkAPI.dispatch(updategoalsData(response.data.goals));
+    if (response.status === 200) {
+      thunkAPI.dispatch(updategoalsData(response.data.goals));
+    }
+  } catch (error) {
+    console.error("Error fetching goals:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 
 export const readTests = createAsyncThunk("dashboard/readTests", async (_, thunkAPI) => {
-  let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readTests`);
+  try {
+    let response = await axios.get(`${backendServerBaseURL}/api/v1/dashboard/readTests`);
 
-  if (response.status === 200) {
-    thunkAPI.dispatch(updatetestsData(response.data.tests));
+    if (response.status === 200) {
+      thunkAPI.dispatch(updatetestsData(response.data.tests));
+    }
+  } catch (error) {
+    console.error("Error fetching tests:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 

@@ -52,7 +52,7 @@ function PublicToolbar() {
       </div>
 
       <div className="hstack">
-        <div class="dropdown"></div>
+        <div className="dropdown"></div>
       </div>
     </div>
   );

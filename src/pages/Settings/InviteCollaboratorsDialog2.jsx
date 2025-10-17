@@ -98,7 +98,7 @@ function InviteCollaboratorsDialog2() {
                 <div className="hstack gap-2">
                   <button
                     type="button"
-                    class="btn btn-lg btn-outline-danger"
+                    className="btn btn-lg btn-outline-danger"
                     data-bs-dismiss="modal"
                     onClick={() => {
                       setinviteEmails([]);
@@ -121,7 +121,7 @@ function InviteCollaboratorsDialog2() {
                       );
                     }}
                     type="submit"
-                    class={"btn btn-lg btn-primary"}
+                    className={"btn btn-lg btn-primary"}
                   >
                     Invite Collaborator
                   </button>

@@ -47,8 +47,7 @@ axiosInstance.interceptors.response.use(
       window.open("/", "_self");
     }
 
-    Promise.reject(error.response && error.response.data);
-    throw error;
+    return Promise.reject(error.response && error.response.data);
   }
 );
 

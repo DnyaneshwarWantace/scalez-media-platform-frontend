@@ -36,7 +36,7 @@ function AvatarGroup({ listOfUrls, show, total, userName, owner}) {
         })}
         {total > show && (
           <div
-            className="w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center text-xs font-medium border-2 border-background hover:scale-110 transition-transform text-white"
+            className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium border-2 border-background hover:scale-110 transition-transform text-gray-800"
             title={`${total - show} more member${total - show > 1 ? 's' : ''}`}
           >
             +{total - show}

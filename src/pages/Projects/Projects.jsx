@@ -193,10 +193,9 @@ function Projects() {
                 {selectedMenu === "All Projects" && (
                   <Button
                     className="bg-gray-900 hover:bg-gray-800 text-white"
-                    data-bs-toggle="modal"
-                    data-bs-target="#createProjectModal"
                     onClick={() => {
                       dispatch(updateSelectedProject(null));
+                      setIsCreateProjectDialogOpen(true);
                     }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -303,9 +302,11 @@ function Projects() {
                                       ? "bg-black text-white"
                                       : project.status === "On Hold"
                                       ? "bg-gray-100 text-black"
+                                      : project.status === "Not Defined"
+                                      ? "bg-gray-100 text-gray-800"
                                       : ""
                                   } text-xs`}
-                                  variant={project.status === "Active" || project.status === "Completed" || project.status === "On Hold" ? undefined : "secondary"}
+                                  variant={project.status === "Active" || project.status === "Completed" || project.status === "On Hold" || project.status === "Not Defined" ? undefined : undefined}
                                 >
                                   {project.status}
                                 </Badge>
@@ -348,9 +349,11 @@ function Projects() {
                                   ? "bg-black text-white"
                                   : project.status === "On Hold"
                                   ? "bg-gray-100 text-black"
+                                  : project.status === "Not Defined"
+                                  ? "bg-gray-100 text-gray-800"
                                   : ""
                               } text-xs`}
-                              variant={project.status === "Active" || project.status === "Completed" || project.status === "On Hold" ? undefined : "secondary"}
+                              variant={project.status === "Active" || project.status === "Completed" || project.status === "On Hold" || project.status === "Not Defined" ? undefined : undefined}
                             >
                               {project.status}
                             </Badge>
@@ -383,10 +386,9 @@ function Projects() {
                                 </DropdownMenuItem>
                               {!project.isArchived && (
                                   <DropdownMenuItem
-                                      data-bs-toggle="modal"
-                                      data-bs-target="#createProjectModal"
                                       onClick={() => {
                                       dispatch(updateSelectedProject(project));
+                                      setIsCreateProjectDialogOpen(true);
                                       }}
                                     >
                                       Edit Project
@@ -458,7 +460,10 @@ function Projects() {
       {/* Modals */}
       <CreateNewProjectDialog 
         isOpen={isCreateProjectDialogOpen} 
-        onClose={() => setIsCreateProjectDialogOpen(false)} 
+        onClose={() => {
+          setIsCreateProjectDialogOpen(false);
+          dispatch(updateSelectedProject(null));
+        }} 
       />
       <DeleteProjectDialog projectToDelete={projectToDelete} />
       </div>

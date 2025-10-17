@@ -10,13 +10,13 @@ const initialState = {
 
 // Get Me
 export const getMe = createAsyncThunk("general/getMe", async (_, thunkAPI) => {
-  let response = await axios2.get(`${backendServerBaseURL}/api/v1/auth/me`);
+  try {
+    let response = await axios2.get(`${backendServerBaseURL}/api/v1/auth/me`);
 
-
-  if (response.status === 200 && response.data.message === "User retrieved successfully") {  
-    // localStorage.setItem("accessToken", response.data.token);
-    localStorage.setItem("userData", JSON.stringify(response.data.user));
-    console.log('userData', response.data.user);
+    if (response.status === 200 && response.data.message === "User retrieved successfully") {  
+      // localStorage.setItem("accessToken", response.data.token);
+      localStorage.setItem("userData", JSON.stringify(response.data.user));
+      console.log('userData', response.data.user);
     // let projects = JSON.parse(localStorage.getItem("projectsData"));
     // console.log('projects.length', projects)
 
@@ -53,6 +53,10 @@ export const getMe = createAsyncThunk("general/getMe", async (_, thunkAPI) => {
     
     // Dispatch the updateMe action with the updated userData
   
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return thunkAPI.rejectWithValue(error.message);
   }
 });
 

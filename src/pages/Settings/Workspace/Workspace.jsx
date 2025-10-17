@@ -168,7 +168,7 @@ function Workspace() {
 
       {/* <div style={{ maxWidth: "60%" }}>
         <div className="row">
-          <div class="mt-3 col-8">
+          <div className="mt-3 col-8">
             <div>
               <label className="form-label">Timezone</label>
 
@@ -244,7 +244,7 @@ function Workspace() {
                         {singleKeyMetric.name}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">
+                        <Badge className="bg-gray-100 text-gray-800">
                           {singleKeyMetric.metricType}
                         </Badge>
                       </TableCell>
@@ -467,11 +467,7 @@ function Workspace() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    const modal = document.getElementById('AddSampleDataDialog');
-                    if (modal) {
-                      const bootstrapModal = new window.bootstrap.Modal(modal);
-                      bootstrapModal.show();
-                    }
+                    window.dispatchEvent(new CustomEvent('openAddSampleDataDialog'));
                   }}
                 >
                   <Database className="h-4 w-4 mr-2" />

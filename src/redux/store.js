@@ -7,6 +7,7 @@ import dashboardReducer from "./slices/dashboardSlice";
 import actionPlanReducer from "./slices/actionPlanSlice";
 import anayticsReducer from "./slices/anayticsSlice";
 import funnelProjectReducer from "./slices/funnelProjectSlice";
+import northStarMetricReducer from "./slices/northStarMetricSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,5 +19,6 @@ export const store = configureStore({
     actionPlan: actionPlanReducer,
     anaytics: anayticsReducer,
     funnelProject: funnelProjectReducer,
+    northStarMetric: northStarMetricReducer,
   },
 });

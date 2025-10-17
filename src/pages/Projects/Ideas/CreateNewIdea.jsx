@@ -267,12 +267,12 @@ function CreateNewIdea({ selectedGoal }) {
                           {/* Select a goal */}
                           <div className="col-6" style={{whiteSpace: "nowrap" , overflow: "hidden", textOverflow: "ellipsis", display: "inline-block"}}>
                             <label className="form-label">Select a Goal</label>
-                            <select {...aboutGoalFormik.getFieldProps("goal")} class="form-select">
+                            <select {...aboutGoalFormik.getFieldProps("goal")} className="form-select">
                               <option value="" className="text-secondary">
                                 Select a Goal
                               </option>
                               {goals.map((goal) => {
-                                return <option value={goal._id} style={{whiteSpace: "nowrap" , overflow: "hidden", textOverflow: "ellipsis", display: "inline-block"}}>{goal.name}</option>;
+                                return <option key={goal._id} value={goal._id} style={{whiteSpace: "nowrap" , overflow: "hidden", textOverflow: "ellipsis", display: "inline-block"}}>{goal.name}</option>;
                               })}
                             </select>
                             <span
@@ -288,7 +288,7 @@ function CreateNewIdea({ selectedGoal }) {
                             <label className="form-label">Key Metric</label>
                             <select
                               {...aboutGoalFormik.getFieldProps("keyMetric")}
-                              class="form-select"
+                              className="form-select"
                               disabled={aboutGoalFormik.values.goal === "" || aboutGoalFormik.values.goal === null}
                             >
                             <option value="" className="text-secondary">
@@ -307,7 +307,6 @@ function CreateNewIdea({ selectedGoal }) {
                                                     <option
                                                         key={keymetric._id}
                                                         value={keymetric._id}
-                                                        selected={selectedIdea.keymetric === keymetric._id}
                                                     >
                                                         {keymetric.name}
                                                     </option>
@@ -326,12 +325,12 @@ function CreateNewIdea({ selectedGoal }) {
 
                         {/* Growth Lever */}
                         <label className="form-label">Growth Lever</label>
-                        <select {...aboutGoalFormik.getFieldProps("lever")} class="form-select">
+                        <select {...aboutGoalFormik.getFieldProps("lever")} className="form-select">
                           <option value="" className="text-secondary">
                             Select a growth lever
                           </option>
                           {allGrowthLevers?.map((singleGrowthLever) => {
-                            return <option value={singleGrowthLever?.name}>{singleGrowthLever?.name}</option>;
+                            return <option key={singleGrowthLever?.name} value={singleGrowthLever?.name}>{singleGrowthLever?.name}</option>;
                           })}
                         </select>
                         <span
@@ -378,6 +377,7 @@ function CreateNewIdea({ selectedGoal }) {
                          <div className="row border rounded m-0">                        
                          {selectedIdea?.media.filter(mediaUrl => deletedMedia.includes(mediaUrl) === false).map((mediaUrl) => {
                              return   <div
+                               key={mediaUrl}
                                   onMouseEnter={() => {
                                     setmediaActionsOverlay(mediaUrl);
                                   }}
@@ -404,7 +404,7 @@ function CreateNewIdea({ selectedGoal }) {
                                         }}
                                       >
                                         <i
-                                          class="bi bi-trash3-fill cp text-danger"
+                                          className="bi bi-trash3-fill cp text-danger"
                                           style={{ fontSize: "1rem" }}
                                           onClick={() => {
                                             setdeletedMedia([...deletedMedia, mediaUrl]);                                        
@@ -419,6 +419,7 @@ function CreateNewIdea({ selectedGoal }) {
                             {mediaDocuments.map((file, index) => {
                               return isFileImage(file) ? (
                                 <div
+                                  key={index}
                                   onMouseEnter={() => {
                                     setmediaActionsOverlay(file.name);
                                   }}
@@ -445,7 +446,7 @@ function CreateNewIdea({ selectedGoal }) {
                                         }}
                                       >
                                         <i
-                                          class="bi bi-trash3-fill cp text-danger"
+                                          className="bi bi-trash3-fill cp text-danger"
                                           style={{ fontSize: "1rem" }}
                                           onClick={() => {
                                             setmediaDocuments([
@@ -492,7 +493,7 @@ function CreateNewIdea({ selectedGoal }) {
                                         }}
                                       >
                                         <i
-                                          class="bi bi-trash3-fill cp text-danger"
+                                          className="bi bi-trash3-fill cp text-danger"
                                           style={{ fontSize: "1rem" }}
                                           onClick={() => {
                                             setmediaDocuments([
@@ -530,7 +531,7 @@ function CreateNewIdea({ selectedGoal }) {
                           <div className="hstack gap-2 mt-3">
                             <button
                               type="button"
-                              class="btn btn-lg btn-outline-danger"
+                              className="btn btn-lg btn-outline-danger"
                               data-bs-dismiss="modal"
                               onClick={() => {
                                 resetAllFields();
@@ -543,7 +544,7 @@ function CreateNewIdea({ selectedGoal }) {
                             {selectedIdea ? (
                                 <LoadingButton
                                 loading={isSubmitting}
-                                class={"btn btn-lg btn-primary"}
+                                className={"btn btn-lg btn-primary"}
                                 type="button"
                                 onClick={async () => {
                                   setisSubmitting(true);
@@ -558,7 +559,7 @@ function CreateNewIdea({ selectedGoal }) {
                                 onClick={() => {
                                   setselectedMenu("I.C.E Score");
                                 }}
-                                class={"btn btn-lg " + (!aboutGoalFormik.isValid || !aboutGoalFormik.dirty ? "btn-secondary" : "btn-primary")}
+                                className={"btn btn-lg " + (!aboutGoalFormik.isValid || !aboutGoalFormik.dirty ? "btn-secondary" : "btn-primary")}
                                 disabled={!aboutGoalFormik.isValid || !aboutGoalFormik.dirty}
                               >
                                 Next
@@ -600,7 +601,7 @@ function CreateNewIdea({ selectedGoal }) {
                           <label className="form-label">Impact</label>
                           <select
                             {...confidenceFormik.getFieldProps("impact")}
-                            class="form-select"
+                            className="form-select"
                             onChange={(e) => {
                               if (e.target.value !== "" && confidenceFormik.values.confidence !== "" && confidenceFormik.values.ease !== "") {
                                 confidenceFormik.setFieldValue(
@@ -647,7 +648,7 @@ function CreateNewIdea({ selectedGoal }) {
                           <label className="form-label">Confidence</label>
                           <select
                             {...confidenceFormik.getFieldProps("confidence")}
-                            class="form-select"
+                            className="form-select"
                             onChange={(e) => {
                               if (e.target.value !== "" && confidenceFormik.values.impact !== "" && confidenceFormik.values.ease !== "") {
                                 confidenceFormik.setFieldValue(
@@ -692,7 +693,7 @@ function CreateNewIdea({ selectedGoal }) {
                           <label className="form-label">Ease</label>
                           <select
                             {...confidenceFormik.getFieldProps("ease")}
-                            class="form-select"
+                            className="form-select"
                             onChange={(e) => {
                               if (e.target.value !== "" && confidenceFormik.values.impact !== "" && confidenceFormik.values.confidence !== "") {
                                 confidenceFormik.setFieldValue(
@@ -741,7 +742,7 @@ function CreateNewIdea({ selectedGoal }) {
                           <div className="hstack gap-2">
                             <button
                               type="button"
-                              class="btn btn-lg btn-outline-danger"
+                              className="btn btn-lg btn-outline-danger"
                               data-bs-dismiss="modal"
                               onClick={() => {
                                 resetAllFields();
@@ -754,7 +755,7 @@ function CreateNewIdea({ selectedGoal }) {
                             {selectedIdea ? (
                               <LoadingButton
                                 loading={isSubmitting}
-                                class={"btn btn-lg btn-primary"}
+                                className={"btn btn-lg btn-primary"}
                                 type="button"
                                 onClick={async () => {
                                   setisSubmitting(true);
@@ -773,7 +774,7 @@ function CreateNewIdea({ selectedGoal }) {
                                   await submitNewGoalForm();
                                   setisSubmitting(false);
                                 }}
-                                class={"btn btn-lg " + (!confidenceFormik.isValid || !confidenceFormik.dirty ? "btn-secondary" : "btn-primary")}
+                                className={"btn btn-lg " + (!confidenceFormik.isValid || !confidenceFormik.dirty ? "btn-secondary" : "btn-primary")}
                                 disabled={!confidenceFormik.isValid || !confidenceFormik.dirty}
                               >
                                 Create Idea

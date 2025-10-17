@@ -39,6 +39,7 @@ import { Button } from "../../components/ui/button";
 import { Progress } from "../../components/ui/progress";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import { Filter, MoreHorizontal, ChevronDown, User } from "lucide-react";
+import NorthStarWidget from "../../components/NorthStarWidget";
 let options = {
   elements: {
     line: {
@@ -105,11 +106,6 @@ let options = {
 function Dashboard() {
   const [yourTasks, setyourTasks] = useState([1, 2, 3]);
   
-  // Project filter states for each section
-  const [selectedTestProject, setSelectedTestProject] = useState('all');
-  const [selectedGoalProject, setSelectedGoalProject] = useState('all');
-  const [selectedLearningProject, setSelectedLearningProject] = useState('all');
-  const [selectedIdeaProject, setSelectedIdeaProject] = useState('all');
   
   const dispatch = useDispatch();
   const tasksAssigned = useSelector(selecttasksAssigned);
@@ -121,42 +117,22 @@ function Dashboard() {
   console.log('me Dashboard:>> ', me);
   console.log('me firstName:>> ', me?.firstName);
 
-  // Reusable ProjectFilter component
-  const ProjectFilter = ({ value, onChange, placeholder = "All Projects" }) => {
-    const selectedProject = projects?.find(p => p._id === value);
-    const displayText = value === 'all' ? 'All Projects' : selectedProject?.name || placeholder;
-    
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-[180px] justify-between">
-            <span className="truncate">{displayText}</span>
-            <ChevronDown className="h-4 w-4 text-black" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[180px]">
-          <DropdownMenuItem 
-            onClick={() => onChange('all')}
-            className={value === 'all' ? 'bg-black text-white' : ''}
-          >
-            All Projects
-          </DropdownMenuItem>
-          {projects?.map((project) => (
-            <DropdownMenuItem 
-              key={project._id} 
-              onClick={() => onChange(project._id)}
-              className={value === project._id ? 'bg-black text-white' : ''}
-            >
-              {project.name}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
   console.log('me name:>> ', me?.name);
   console.log('me email:>> ', me?.email);
   const projects = useSelector(selectProjects);
+
+  // Helper function to filter data by selected project
+  const filterDataByProject = (data, projectField = 'project') => {
+    if (!selectedProject) return data; // Show all if no project selected
+    
+    return data?.filter(item => {
+      const project = item[projectField];
+      return project?._id === selectedProject || 
+             project === selectedProject || 
+             item.projectId === selectedProject ||
+             item.projectId?._id === selectedProject;
+    }) || [];
+  };
   // console.log('projects DB:>> ', projects);
   const goalsData = useSelector(selectgoalsData);
   let goalInfo = goalsData.filter((idea) => idea.owner === me?.id);
@@ -224,7 +200,6 @@ function Dashboard() {
   useEffect(() => {
     dispatch(getMe()); 
     dispatch(getAllProjects());
-    dispatch(readTasks());
     dispatch(readTasks());
     dispatch(readCheckins());
     dispatch(readLearnings());
@@ -315,8 +290,8 @@ function Dashboard() {
                 >
                   <span className={selectedProject ? "text-gray-900" : "text-gray-500"}>
                     {selectedProject 
-                      ? projects?.find(p => p._id === selectedProject)?.name || "Choose a project..."
-                      : "Choose a project..."
+                      ? projects?.find(p => p._id === selectedProject)?.name || "All Projects"
+                      : "All Projects"
                     }
                   </span>
                   <svg 
@@ -332,6 +307,15 @@ function Dashboard() {
                 {/* Dropdown Menu */}
                 {showDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                    <button
+                      className="w-full px-3 py-2 text-left text-gray-900 hover:bg-gray-50 transition-colors duration-150 first:rounded-t-lg text-sm"
+                      onClick={() => {
+                        setSelectedProject("");
+                        setShowDropdown(false);
+                      }}
+                    >
+                      All Projects
+                    </button>
                     {projects?.map((project) => (
                     <button
                         key={project._id}
@@ -339,7 +323,6 @@ function Dashboard() {
                         onClick={() => {
                           setSelectedProject(project._id);
                           setShowDropdown(false);
-                          navigate(`/projects/${project._id}`);
                         }}
                       >
                         {project.name}
@@ -373,9 +356,9 @@ function Dashboard() {
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Active Goals</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold">{goalsData?.length || 0}</span>
+                  <span className="text-2xl font-bold">{filterDataByProject(goalsData)?.length || 0}</span>
                   <span className="text-sm font-medium text-green-600">
-                    {goalsData?.filter(g => g.status === 'Active')?.length || 0} active
+                    {filterDataByProject(goalsData)?.filter(g => g.status === 'Active')?.length || 0} active
                   </span>
                                 </div>
                 <p className="text-xs text-muted-foreground">Currently tracking</p>
@@ -388,9 +371,9 @@ function Dashboard() {
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Ideas Generated</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold">{ideasData?.length || 0}</span>
+                  <span className="text-2xl font-bold">{filterDataByProject(ideasData)?.length || 0}</span>
                   <span className="text-sm font-medium text-green-600">
-                    {ideasData?.filter(i => new Date(i.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))?.length || 0} new
+                    {filterDataByProject(ideasData)?.filter(i => new Date(i.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))?.length || 0} new
                   </span>
                                 </div>
                 <p className="text-xs text-muted-foreground">Last 30 days</p>
@@ -403,9 +386,9 @@ function Dashboard() {
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Active Tests</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold">{testsData?.filter(t => t.status === 'Running')?.length || 0}</span>
+                  <span className="text-2xl font-bold">{filterDataByProject(testsData)?.filter(t => t.status === 'Running')?.length || 0}</span>
                   <span className="text-sm font-medium text-green-600">
-                    {testsData?.filter(t => t.status === 'Completed')?.length || 0} completed
+                    {filterDataByProject(testsData)?.filter(t => t.status === 'Completed')?.length || 0} completed
                                   </span>
                   </div>
                 <p className="text-xs text-muted-foreground">This month</p>
@@ -418,9 +401,9 @@ function Dashboard() {
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Learnings Captured</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold">{learningsData?.length || 0}</span>
+                  <span className="text-2xl font-bold">{filterDataByProject(learningsData)?.length || 0}</span>
                   <span className="text-sm font-medium text-green-600">
-                    {learningsData?.filter(l => new Date(l.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))?.length || 0} this week
+                    {filterDataByProject(learningsData)?.filter(l => new Date(l.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))?.length || 0} this week
                                   </span>
                       </div>
                 <p className="text-xs text-muted-foreground">From completed tests</p>
@@ -435,11 +418,6 @@ function Dashboard() {
              <div className="flex items-center justify-between">
                <h2 className="text-xl font-semibold">Active Goals</h2>
                <div className="flex items-center gap-2">
-                 <ProjectFilter 
-                   value={selectedGoalProject} 
-                   onChange={setSelectedGoalProject}
-                   placeholder="Filter by Project"
-                 />
                  <Button 
                    variant="outline" 
                    size="sm"
@@ -463,18 +441,8 @@ function Dashboard() {
                                       </div>
                
                <div className="grid gap-4">
-               {goalsData?.filter(goal => 
-                 selectedGoalProject === 'all' || 
-                 goal.project?._id === selectedGoalProject ||
-                 goal.projectId?._id === selectedGoalProject ||
-                 goal.project === selectedGoalProject
-               ).length > 0 ? (
-                 goalsData.filter(goal => 
-                   selectedGoalProject === 'all' || 
-                   goal.project?._id === selectedGoalProject ||
-                   goal.projectId?._id === selectedGoalProject ||
-                   goal.project === selectedGoalProject
-                 ).slice(0, 3).map((goal, index) => {
+               {filterDataByProject(goalsData)?.length > 0 ? (
+                 filterDataByProject(goalsData).slice(0, 3).map((goal, index) => {
                    // Debug goal data - show all goal properties
                    console.log('Goal data:', goal);
                    console.log('Goal name:', goal.name);
@@ -490,20 +458,20 @@ function Dashboard() {
                    // Get status with proper mapping - matching Projects page colors
                    const getStatusBadge = (status) => {
                      const statusText = status || 'Active'; // Default to Active if no status
-                     let badgeClass = 'bg-gray-900 text-white'; // Default black for Active
+                     let badgeClass = 'bg-black text-white'; // Default black for Active
                      
                      switch (statusText.toLowerCase()) {
                        case 'active':
-                         badgeClass = 'bg-gray-900 text-white';
+                         badgeClass = 'bg-black text-white';
                          break;
                        case 'completed':
-                         badgeClass = 'bg-gray-900 text-white';
+                         badgeClass = 'bg-black text-white';
                          break;
                        case 'on hold':
                          badgeClass = 'bg-gray-100 text-black';
                          break;
                        default:
-                         badgeClass = 'bg-gray-900 text-white'; // Default to black
+                         badgeClass = 'bg-gray-100 text-gray-800'; // Default to light gray for Not Defined
                      }
                      
                       return (
@@ -617,11 +585,6 @@ function Dashboard() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Recent Learnings</h2>
-                <ProjectFilter 
-                  value={selectedLearningProject} 
-                  onChange={setSelectedLearningProject}
-                  placeholder="Filter by Project"
-                />
               </div>
 
             <Card>
@@ -635,12 +598,8 @@ function Dashboard() {
               </div>
 
                 <div className="grid gap-4">
-                  {learningsData?.filter(learning => 
-                    selectedLearningProject === 'all' || learning.project?._id === selectedLearningProject
-                  ).length > 0 ? (
-                    learningsData.filter(learning => 
-                      selectedLearningProject === 'all' || learning.project?._id === selectedLearningProject
-                    ).slice(0, 3).map((learning, index) => (
+                  {filterDataByProject(learningsData)?.length > 0 ? (
+                    filterDataByProject(learningsData).slice(0, 3).map((learning, index) => (
                       <div 
                         key={index} 
                         className="grid grid-cols-4 gap-4 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
@@ -801,11 +760,6 @@ function Dashboard() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Tests</h2>
               <div className="flex items-center gap-2">
-                <ProjectFilter 
-                  value={selectedTestProject} 
-                  onChange={setSelectedTestProject}
-                  placeholder="Filter by Project"
-                />
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -828,9 +782,7 @@ function Dashboard() {
                                 </div>
 
                 <div className="grid gap-4">
-                  {testsData?.filter(test => 
-                    selectedTestProject === 'all' || test.project?._id === selectedTestProject
-                  ).map((test, index) => (
+                  {filterDataByProject(testsData)?.map((test, index) => (
                     <div 
                       key={index} 
                       className="grid grid-cols-5 gap-4 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
@@ -901,11 +853,6 @@ function Dashboard() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Recent Ideas</h2>
               <div className="flex items-center gap-2">
-                <ProjectFilter 
-                  value={selectedIdeaProject} 
-                  onChange={setSelectedIdeaProject}
-                  placeholder="Filter by Project"
-                />
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -927,10 +874,8 @@ function Dashboard() {
                                   </div>
 
               <div className="grid gap-4">
-                {ideasData?.length > 0 ? (
-                  ideasData.filter(idea => 
-                    selectedIdeaProject === 'all' || idea.project?._id === selectedIdeaProject
-                  ).slice(0, 6).map((idea, index) => (
+                {filterDataByProject(ideasData)?.length > 0 ? (
+                  filterDataByProject(ideasData).slice(0, 6).map((idea, index) => (
                     <div 
                       key={index} 
                       className="grid grid-cols-4 gap-4 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
@@ -999,7 +944,7 @@ function Dashboard() {
               <CardTitle className="flex items-center gap-3">
                 Your Tasks
                 {tasksAssigned?.length !== 0 && (
-                  <Badge variant="secondary">{tasksAssigned?.length}</Badge>
+                  <Badge className="bg-gray-100 text-gray-800">{tasksAssigned?.length}</Badge>
                 )}
               </CardTitle>
             </CardHeader>
@@ -1070,7 +1015,7 @@ function Dashboard() {
               <CardTitle className="flex items-center gap-3">
                 Pending Check-ins
                 {checkins?.filter((c) => c.status !== "On-Track").length !== 0 && (
-                  <Badge variant="secondary">{checkins?.length}</Badge>
+                  <Badge className="bg-gray-100 text-gray-800">{checkins?.length}</Badge>
                 )}
               </CardTitle>
             </CardHeader>
@@ -1101,7 +1046,7 @@ function Dashboard() {
                             {checkin.project?.name || 'No Project'}
                                   </div>
                           <div className="col-span-2">
-                            <Badge variant={checkin.status === 'Off-Track' ? 'destructive' : checkin.status === 'At-Risk' ? 'destructive' : 'secondary'}>
+                            <Badge className={checkin.status === 'Off-Track' ? 'bg-red-100 text-red-800' : checkin.status === 'At-Risk' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}>
                                       {checkin.status}
                             </Badge>
                                   </div>
@@ -1161,6 +1106,13 @@ function Dashboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* North Star Metrics Widget */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <NorthStarWidget />
+          </div>
+        </div>
 
                       </div>
                     </div>

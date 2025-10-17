@@ -45,7 +45,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import { Edit3, Users, Lightbulb, CheckCircle } from "lucide-react";
+import { 
+  Edit3, 
+  Users, 
+  Lightbulb, 
+  CheckCircle,
+  Plus,
+  BarChart3,
+  Bell,
+  Edit,
+  Trash2,
+  Play,
+  UserPlus,
+  Settings,
+  Activity,
+  MessageSquare,
+  Target,
+  TrendingUp,
+  Star
+} from "lucide-react";
 
 function TestInfo() {
   const params = useParams();
@@ -70,6 +88,120 @@ function TestInfo() {
       setShowLoader(false);
     }, 2000);
   }, []);
+
+  // Function to generate comprehensive activity data for tests
+  const generateTestActivities = () => {
+    const activities = [];
+
+    // Add comments as activities
+    if (singleTestInfo?.comments) {
+      singleTestInfo.comments.forEach(comment => {
+        activities.push({
+          id: `comment-${comment._id}`,
+          type: 'comment',
+          user: comment.createdBy,
+          action: 'commented',
+          description: comment.comment,
+          timestamp: comment.createdAt,
+          icon: MessageSquare,
+          color: 'text-blue-600'
+        });
+      });
+    }
+
+    // Add test creation activity
+    if (singleTestInfo?.createdAt) {
+      activities.push({
+        id: `test-created-${singleTestInfo._id}`,
+        type: 'test_created',
+        user: singleTestInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'created test',
+        description: singleTestInfo.name,
+        timestamp: singleTestInfo.createdAt,
+        icon: Play,
+        color: 'text-red-600'
+      });
+    }
+
+    // Add test updates activity
+    if (singleTestInfo?.updatedAt && singleTestInfo.updatedAt !== singleTestInfo.createdAt) {
+      activities.push({
+        id: `test-updated-${singleTestInfo._id}`,
+        type: 'test_updated',
+        user: singleTestInfo.updatedBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated test',
+        description: 'Test details were modified',
+        timestamp: singleTestInfo.updatedAt,
+        icon: Edit3,
+        color: 'text-orange-600'
+      });
+    }
+
+    // Add ICE score updates as activities
+    if (singleTestInfo?.impact || singleTestInfo?.confidence || singleTestInfo?.ease) {
+      activities.push({
+        id: `ice-update-${singleTestInfo._id}`,
+        type: 'ice_update',
+        user: singleTestInfo.updatedBy || singleTestInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated ICE score',
+        description: `Impact: ${singleTestInfo.impact || 0}, Confidence: ${singleTestInfo.confidence || 0}, Ease: ${singleTestInfo.ease || 0}`,
+        timestamp: singleTestInfo.updatedAt || singleTestInfo.createdAt,
+        icon: BarChart3,
+        color: 'text-green-600'
+      });
+    }
+
+    // Add task completions as activities
+    if (singleTestInfo?.tasks) {
+      singleTestInfo.tasks.forEach((task, index) => {
+        if (task.status) {
+          activities.push({
+            id: `task-completed-${singleTestInfo._id}-${index}`,
+            type: 'task_completed',
+            user: singleTestInfo.updatedBy || singleTestInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+            action: 'completed task',
+            description: task.name,
+            timestamp: singleTestInfo.updatedAt || singleTestInfo.createdAt,
+            icon: CheckCircle,
+            color: 'text-green-600'
+          });
+        }
+      });
+    }
+
+    // Add member assignments as activities
+    if (singleTestInfo?.assignedTo && singleTestInfo.assignedTo.length > 0) {
+      singleTestInfo.assignedTo.forEach((member, index) => {
+        activities.push({
+          id: `member-assigned-${singleTestInfo._id}-${index}`,
+          type: 'member_assigned',
+          user: singleTestInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+          action: 'assigned member',
+          description: `${member.firstName} ${member.lastName}`,
+          timestamp: singleTestInfo.createdAt,
+          icon: UserPlus,
+          color: 'text-purple-600'
+        });
+      });
+    }
+
+    // Add status changes as activities
+    if (singleTestInfo?.status) {
+      activities.push({
+        id: `status-change-${singleTestInfo._id}`,
+        type: 'status_change',
+        user: singleTestInfo.updatedBy || singleTestInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'changed status',
+        description: `Status: ${singleTestInfo.status}`,
+        timestamp: singleTestInfo.updatedAt || singleTestInfo.createdAt,
+        icon: Settings,
+        color: 'text-indigo-600'
+      });
+    }
+
+    // Sort activities by timestamp (newest first)
+    return activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  };
 
   return (
     <div className="space-y-6">
@@ -312,7 +444,7 @@ function TestInfo() {
                     </div>
                     <div>
                       <h3 className="text-xs text-muted-foreground mb-1">ICE Score</h3>
-                      <Badge className="bg-gray-900 text-white hover:bg-gray-900 text-xs">
+                      <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 text-xs">
                         {singleTestInfo?.score}
                       </Badge>
                     </div>
@@ -402,7 +534,7 @@ function TestInfo() {
                         <TableCell className="text-sm">{singleTestInfo?.goal?.name || 'No goal assigned'}</TableCell>
                         <TableCell className="text-sm">{singleTestInfo?.keymetric?.name || 'No metric assigned'}</TableCell>
                         <TableCell>
-                          <Badge className="bg-gray-900 text-white hover:bg-gray-900 text-xs">
+                          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 text-xs">
                             {singleTestInfo?.lever || "Not Defined"}
                           </Badge>
                         </TableCell>
@@ -690,10 +822,54 @@ function TestInfo() {
                 </div>
               )}
             </div>
+
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Activity Card */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium">Recent Activity</h3>
+                  <Badge className="bg-gray-100 text-gray-800 text-xs">
+                    {generateTestActivities().length}
+                  </Badge>
+                </div>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {generateTestActivities().slice(0, 10).map((activity) => {
+                    const IconComponent = activity.icon;
+                    return (
+                      <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                        <div className="relative">
+                          <img
+                            src={`${backendServerBaseURL}/${activity.user?.avatar}`}
+                            className="w-6 h-6 rounded-full flex-shrink-0"
+                            alt=""
+                          />
+                          <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-white border border-gray-200 flex items-center justify-center`}>
+                            <IconComponent className={`w-2 h-2 ${activity.color}`} />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm leading-tight m-0">
+                            <span className="font-medium">{activity.user?.firstName} {activity.user?.lastName}</span> {activity.action}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate leading-tight m-0 mt-1" title={activity.description}>
+                            {activity.description}
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-tight m-0 mt-1">{moment(activity.timestamp).fromNow()}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {generateTestActivities().length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Edit Test Card */}
             <Card>
               <CardContent className="p-4">

@@ -225,7 +225,7 @@ function Integrations() {
                 <tbody>
                   {allIntegrations?.map((integration) => {
                     return (
-                      <tr className="border bg-white" style={{ cursor: "pointer" }}>
+                      <tr key={integration._id} className="border bg-white" style={{ cursor: "pointer" }}>
                         <td className="body3 regular-weight align-middle">{integration?.goal?.name}</td>
                         <td className="body3 regular-weight align-middle">{integration?.keymetric?.name}</td>
 
@@ -240,7 +240,7 @@ function Integrations() {
                         </td>
                         <td className="body3 regular-weight align-middle">{formatTime(integration.createdAt)}</td>
                         <td className="body3 regular-weight align-middle">
-                          <div class="dropdown">
+                          <div className="dropdown">
                             <div
                               onClick={(e) => {
                                 e.preventDefault();
@@ -250,7 +250,7 @@ function Integrations() {
                               data-bs-toggle="dropdown"
                               style={{ maxWidth: "6.3rem", cursor: "pointer" }}
                             >
-                              <i class="bi bi-three-dots-vertical custom-more-icon-hover-effect" style={{ padding: "0.5rem" }}></i>
+                              <i className="bi bi-three-dots-vertical custom-more-icon-hover-effect" style={{ padding: "0.5rem" }}></i>
                             </div>
 
                             <ul
@@ -289,7 +289,7 @@ function Integrations() {
                   <div className="mb-4">
                     <div className="hstack gap-3">
                       <img src="/static/icons/logo.svg" alt="" style={{ minWidth: "4rem" }} />
-                      <i class="bi bi-x" style={{ fontSize: "2rem" }}></i>
+                      <i className="bi bi-x" style={{ fontSize: "2rem" }}></i>
                       <img src="/static/icons/google_sheet_icon.svg" alt="" style={{ minWidth: "4rem" }} />
                     </div>
                   </div>

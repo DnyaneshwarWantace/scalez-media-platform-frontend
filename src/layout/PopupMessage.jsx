@@ -16,7 +16,7 @@ function PopupMessage() {
             {popupMessage}
             <i
               style={{ marginLeft: "0.4rem", cursor: "pointer" }}
-              class="bi bi-x-lg text-dark"
+              className="bi bi-x-lg text-dark"
               onClick={() => {
                 dispatch(updatepopupMessage(null));
               }}

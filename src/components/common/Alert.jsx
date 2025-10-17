@@ -2,7 +2,7 @@ import React from "react";
 
 function Alert({ value, variant }) {
   return (
-    <div class={`alert alert-${variant}`}>
+    <div className={`alert alert-${variant}`}>
       {variant === "danger" && (
         <span>
           <img src="/static/icons/alert-danger-icon.svg" alt="" />

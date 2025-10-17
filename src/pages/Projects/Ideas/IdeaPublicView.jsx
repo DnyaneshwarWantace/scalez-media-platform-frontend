@@ -137,7 +137,7 @@ function IdeaPublicView() {
             <p className="body3 mb-2 text-secondary">Media</p>
             <div className="row gap-2" style={{ minHeight: "4rem" }}>
               {selectedIdea?.media.map((mediaUrl) => {
-                return <FilePreview url={`${backendServerBaseURL}/${mediaUrl}`} />;
+                return <FilePreview key={mediaUrl} url={`${backendServerBaseURL}/${mediaUrl}`} />;
               })}
             </div>
           </div>
@@ -154,7 +154,7 @@ function IdeaPublicView() {
                 dispatch(updateSelectedIdea(selectedIdea));
               }}
             >
-              <i class="bi bi-pencil-fill text-primary" style={{ marginRight: "0.5rem" }}></i> Edit Idea
+              <i className="bi bi-pencil-fill text-primary" style={{ marginRight: "0.5rem" }}></i> Edit Idea
             </button>
           </div>
 

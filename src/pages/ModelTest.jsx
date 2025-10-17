@@ -126,11 +126,12 @@ const ModelTest = (props) => {
             <select
               className="form-control"
               id="exampleFormControlSelect1"
+              defaultValue=""
               onChange={(e) => {
                 readOneA(e.target.value);
               }}
             >
-              <option selected value="">
+              <option value="">
                 Select the saved values
               </option>
               {/* {props.list.map((item, index) => (
@@ -149,11 +150,12 @@ const ModelTest = (props) => {
             <select
               className="form-control"
               id="exampleFormControlSelect1"
+              defaultValue=""
               onChange={(e) => {
                 readOneB(e.target.value);
               }}
             >
-              <option selected value="">
+              <option value="">
                 Select the saved values
               </option>
               {/* {props.list.map((item, index) => (

@@ -29,6 +29,27 @@ function App() {
   const storedTheme = localStorage.getItem("theme", defaultTheme);
   const [selectedTheme, setselectedTheme] = useState(defaultTheme);
 
+  // Global error handler for unhandled promise rejections
+  useEffect(() => {
+    const handleUnhandledRejection = (event) => {
+      console.error("Unhandled promise rejection:", event.reason);
+      // Prevent the default browser behavior
+      event.preventDefault();
+    };
+
+    const handleError = (event) => {
+      console.error("Global error:", event.error);
+    };
+
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    window.addEventListener("error", handleError);
+
+    return () => {
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+      window.removeEventListener("error", handleError);
+    };
+  }, []);
+
   const defaultFavicon = "/static/icons/logo.svg";
   const storeFavicon = profileData?.fevicon;
   const [faviconUrl, setFaviconUrl] = useState(defaultFavicon);

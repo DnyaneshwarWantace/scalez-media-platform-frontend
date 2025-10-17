@@ -44,8 +44,8 @@ function ViewKeyMetricDialog() {
                   </div>
                 </div>
 
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-lg btn-outline-danger" data-bs-dismiss="modal">
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-lg btn-outline-danger" data-bs-dismiss="modal">
                     Close
                   </button>
                 </div>

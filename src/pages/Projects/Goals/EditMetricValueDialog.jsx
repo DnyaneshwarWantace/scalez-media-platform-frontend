@@ -69,10 +69,10 @@ function EditMetricValueDialog() {
                     </div>
 
                     <div className="hstack gap-2 d-flex justify-content-end">
-                      <button type="button" class="btn btn-lg btn-outline-danger" data-bs-dismiss="modal" ref={closeModalRef}>
+                      <button type="button" className="btn btn-lg btn-outline-danger" data-bs-dismiss="modal" ref={closeModalRef}>
                         Close
                       </button>
-                      <button type="submit" class="btn btn-lg btn-primary" data-bs-dismiss="modal" ref={closeModalRef}>
+                      <button type="submit" className="btn btn-lg btn-primary" data-bs-dismiss="modal" ref={closeModalRef}>
                         Update Value
                       </button>
                     </div>

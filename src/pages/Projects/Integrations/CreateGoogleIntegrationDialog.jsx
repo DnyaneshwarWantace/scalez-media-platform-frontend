@@ -222,7 +222,7 @@ function CreateGoogleIntegrationDialog({ integrateBtn, goalId, keyMetricId }) {
                       >
                         <option value="">Select a goal</option>
                         {goals.map((singleGoal) => {
-                          return <option value={singleGoal._id}>{singleGoal.name}</option>;
+                          return <option key={singleGoal._id} value={singleGoal._id}>{singleGoal.name}</option>;
                         })}
                       </select>
                       <label htmlFor="" className="text-secondary">
@@ -462,7 +462,7 @@ function CreateGoogleIntegrationDialog({ integrateBtn, goalId, keyMetricId }) {
                       will not sync values with older dates if we have synced a newer data; trigger a full resync if you want all date and values to
                       be erased and resynced from your Google Sheet.
                     </p>
-                    <div class="alert alert-warning" role="alert">
+                    <div className="alert alert-warning" role="alert">
                       DO NOT rename column names in your sheet or change the column data types once the sync is created. You will need to recreate
                       this link if you need to rename a column.
                     </div>

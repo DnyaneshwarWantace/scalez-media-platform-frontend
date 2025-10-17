@@ -335,10 +335,6 @@ function NodeModal({ open, onOpenChange, data, nodeId, type }) {
                       <option
                         key={product._id}
                         value={product._id}
-                        selected={
-                          product?._id?.toString() ==
-                          data?.product?._id?.toString()
-                        }
                       >
                         {product.name}
                       </option>

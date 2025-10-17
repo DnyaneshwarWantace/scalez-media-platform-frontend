@@ -90,7 +90,7 @@ function QuickStart() {
                   Getting Started
                 </CardTitle>
                 <div className="flex items-center gap-3">
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge className="bg-gray-100 text-gray-800 text-sm">
                     {completedQuickStartGuide()} / 3
                   </Badge>
                   <Progress value={getProgressPercentage()} className="w-20" />
@@ -199,7 +199,7 @@ function QuickStart() {
                   )}
                 </CardTitle>
                 <div className="flex items-center gap-3">
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge className="bg-gray-100 text-gray-800 text-sm">
                     {(meAPI?.quickstart?.create_goal ? 1 : 0) +
                       (meAPI?.quickstart?.create_idea ? 1 : 0) +
                       (meAPI?.quickstart?.create_learning ? 1 : 0) +

@@ -120,7 +120,7 @@ console.log("filter",filterRoles)
                 <div className="hstack gap-2">
                   <button
                     type="button"
-                    class="btn btn-lg btn-outline-danger"
+                    className="btn btn-lg btn-outline-danger"
                     data-bs-dismiss="modal"
                     onClick={() => {
                       setinviteEmails([]);
@@ -132,7 +132,7 @@ console.log("filter",filterRoles)
 
                   <button
                     type="submit"
-                    class={"btn btn-lg btn-primary"}
+                    className={"btn btn-lg btn-primary"}
                     onClick={() => {
                       dispatch(
                         inviteUser({

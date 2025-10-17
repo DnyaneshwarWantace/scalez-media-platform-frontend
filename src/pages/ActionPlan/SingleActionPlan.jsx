@@ -42,7 +42,7 @@ function SingleActionPlan() {
                 }}
               >
                 <i
-                  class="bi bi-arrow-left"
+                  className="bi bi-arrow-left"
                   style={{ marginRight: "0.3rem" }}
                 ></i>
                 <p className="text-secondary mb-0 ml-1">All Action Plans</p>

@@ -151,7 +151,7 @@ function TaskLearningDialog() {
                     {/* Assign to */}
                     <div className="form-field">
                       <label className="form-label">Assign to</label>
-                      <div class="dropdown" id="teamMemberSelectDropdown">
+                      <div className="dropdown" id="teamMemberSelectDropdown">
                         <div
                           className="border d-flex justify-content-between align-items-center p-2 rounded"
                           // data-bs-toggle="dropdown"
@@ -171,7 +171,7 @@ function TaskLearningDialog() {
                               .slice(0, numberOfTeamMembersToShowInSelect)
                               .map((teamMember) => {
                                 return (
-                                  <span>
+                                  <span key={teamMember.id || teamMember._id}>
                                     <span>
                                       <img
                                         src={`${backendServerBaseURL}/${teamMember.avatar}`}
@@ -186,7 +186,7 @@ function TaskLearningDialog() {
                                     </span>
                                     <button
                                       type="button"
-                                      class="btn-secondary btn-close"
+                                      className="btn-secondary btn-close"
                                       style={{
                                         fontSize: "8px",
                                         marginRight: "12px",
@@ -260,6 +260,7 @@ function TaskLearningDialog() {
                           {projectUsers.map((teamMember) => {
                             return (
                               <li
+                                key={teamMember.id || teamMember._id}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -289,7 +290,7 @@ function TaskLearningDialog() {
                                   <div className="ml-auto">
                                     <button
                                       type="button"
-                                      class="btn-secondary btn-close"
+                                      className="btn-secondary btn-close"
                                       style={{
                                         fontSize: "8px",
                                         marginRight: "12px",
@@ -342,7 +343,7 @@ function TaskLearningDialog() {
                             key={task}
                             className="d-flex border rounded p-2 mb-1"
                           >
-                            <i class="bi bi-grip-vertical"></i>
+                            <i className="bi bi-grip-vertical"></i>
                             <div
                               className="flex-fill"
                               style={{ paddingLeft: "0.5rem" }}
@@ -350,7 +351,7 @@ function TaskLearningDialog() {
                               <p className="m-0">{task}</p>
                             </div>
                             <i
-                              class="bi bi-trash3-fill"
+                              className="bi bi-trash3-fill"
                               onClick={() => {
                                 let tempTaskList = [...tasksList];
                                 tempTaskList.splice(tasksList.indexOf(task), 1);
@@ -386,13 +387,13 @@ function TaskLearningDialog() {
                       <div className="hstack gap-2 d-flex justify-content-end">
                         <button
                           type="button"
-                          class="btn btn-lg btn-outline-danger"
+                          className="btn btn-lg btn-outline-danger"
                           data-bs-dismiss="modal"
                           ref={closeRef}
                         >
                           Close
                         </button>
-                        <button type="submit" class="btn btn-lg btn-primary">
+                        <button type="submit" className="btn btn-lg btn-primary">
                           {selectedTest ? "Update Test" : "Assign Test"}
                         </button>
                       </div>

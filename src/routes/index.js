@@ -46,6 +46,7 @@ import Analytics from "../pages/Analytics/Analytics";
 import IdeaPublicView from "../pages/Projects/Ideas/IdeaPublicView";
 import PublicLayout from "../layout/PublicLayout";
 import FunnelMainLayout from "../layout/FunnelMainLayout";
+import NorthStarMetrics from "../pages/NorthStar/NorthStarMetrics";
 // import ScalezModel from "../pages/Models/scalezModel";
 import FunnelDashboard from "../pages/Dashboard";
 import ViewPointer from "../pages/ActionPlan/ViewPointer";
@@ -301,6 +302,17 @@ export default function Router({ socket }) {
         {
           path: "",
           element: <Analytics />,
+        },
+      ],
+    },
+
+    {
+      path: "north-star",
+      element: <MainLayout socket={socket} />,
+      children: [
+        {
+          path: "",
+          element: <NorthStarMetrics />,
         },
       ],
     },

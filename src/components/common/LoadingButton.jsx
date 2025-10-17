@@ -1,17 +1,19 @@
 import React, { Children } from "react";
 
 function LoadingButton(props) {
+  const { loading, ...buttonProps } = props;
+  
   return (
     <>
-      {props.loading === true && (
-        <button {...props}>
-          <div class="spinner-border spinner-border-sm" role="status">
-            <span class="visually-hidden">Loading...</span>
+      {loading === true && (
+        <button {...buttonProps}>
+          <div className="spinner-border spinner-border-sm" role="status">
+            <span className="visually-hidden">Loading...</span>
           </div>
         </button>
       )}
 
-      {!props.loading && <button {...props}>{props.children}</button>}
+      {!loading && <button {...buttonProps}>{props.children}</button>}
     </>
   );
 }

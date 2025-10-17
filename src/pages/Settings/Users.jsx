@@ -127,7 +127,7 @@ function Users() {
     const alertElement = document.createElement("div");
     alertElement.className = "alert alert-success mt-3";
     alertElement.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-check-circle-fill me-2" viewBox="0 0 16 16">
         <path d="M7.5 1C3.91 1 1 3.91 1 7.5S3.91 14 7.5 14 14 11.09 14 7.5 11.09 1 7.5 1zm2.516 5.97a.53.53 0 0 1-.77 0L6.47 9.47l-1.47-1.47a.53.53 0 1 1 .76-.76L7 8.24l2.24-2.23a.53.53 0 1 1 .76.76l-2.23 2.23 2.23 2.23a.53.53 0 0 1 0 .77z"/>
       </svg>
       Link Copied!

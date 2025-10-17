@@ -183,13 +183,13 @@ function Billing() {
                   </td>
 
                   <td className="body3 regular-weight">
-                    <div class="dropdown">
+                    <div className="dropdown">
                       <div
                         className=" d-flex justify-content-between align-items-center rounded"
                         data-bs-toggle="dropdown"
                         style={{ cursor: "pointer" }}
                       >
-                        <i class="bi bi-three-dots-vertical cp custom-more-icon-hover-effect" style={{ padding: "0.5rem" }}></i>
+                        <i className="bi bi-three-dots-vertical cp custom-more-icon-hover-effect" style={{ padding: "0.5rem" }}></i>
                       </div>
 
                       <ul className="dropdown-menu">
@@ -260,13 +260,13 @@ function Billing() {
                     )}
                   </td>
                   <td className="body3 regular-weight">
-                    <div class="dropdown">
+                    <div className="dropdown">
                       {/* <div
                         className=" d-flex justify-content-between align-items-center rounded"
                         data-bs-toggle="dropdown"
                         style={{ cursor: "pointer" }}
                       >
-                        <i class="bi bi-three-dots-vertical cp"></i>
+                        <i className="bi bi-three-dots-vertical cp"></i>
                       </div> */}
 
                       <ul className="dropdown-menu">

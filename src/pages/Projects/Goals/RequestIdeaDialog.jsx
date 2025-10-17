@@ -46,17 +46,16 @@ function RequestIdeaDialog() {
   const { errors, touched, handleSubmit, isSubmitting, getFieldProps, values } = formik;
 
   const addTeamMember = (teamMember) => {
-    if (!teamMember) return;
     console.log(selectedTeamMembers);
     let uniqueItems = [...new Set(selectedTeamMembers.concat([teamMember]))];
     setselectedTeamMembers(uniqueItems);
   };
 
-  const removeSelectedTeamMember = (teamMemberToRemove) => {
-    console.log(teamMemberToRemove);
+  const removeSelectedTeamMember = (id) => {
+    console.log(id);
     let tempTM = [];
     selectedTeamMembers.map((tm, index) => {
-      if (tm && tm !== teamMemberToRemove) {
+      if (tm != id) {
         tempTM.push(tm);
       }
     });
@@ -100,7 +99,7 @@ function RequestIdeaDialog() {
 
                   <div className="form-field">
                     <label className="form-label">Team Members</label>
-                    <div class="dropdown" id="teamMemberSelectDropdown">
+                    <div className="dropdown" id="teamMemberSelectDropdown">
                       <div
                         className="border d-flex justify-content-between align-items-center p-2 rounded"
                         // data-bs-toggle="dropdown"
@@ -114,7 +113,7 @@ function RequestIdeaDialog() {
                         <span>
                           {selectedTeamMembers.slice(0, numberOfTeamMembersToShowInSelect).map((teamMember) => {
                             return (
-                              <span>
+                              <span key={teamMember.id || teamMember._id}>
                                 <span>
                                   <img
                                     src={`${backendServerBaseURL}/${teamMember.avatar}`}
@@ -128,7 +127,7 @@ function RequestIdeaDialog() {
                                 </span>
                                 <button
                                   type="button"
-                                  class="btn-secondary btn-close"
+                                  className="btn-secondary btn-close"
                                   style={{ fontSize: "8px", marginRight: "12px" }}
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -184,6 +183,7 @@ function RequestIdeaDialog() {
                         {projectUsers.map((teamMember) => {
                           return (
                             <li
+                              key={teamMember.id || teamMember._id}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -206,7 +206,7 @@ function RequestIdeaDialog() {
                                 <div className="ml-auto">
                                   <button
                                     type="button"
-                                    class="btn-secondary btn-close"
+                                    className="btn-secondary btn-close"
                                     style={{ fontSize: "8px", marginRight: "12px" }}
                                     onClick={(e) => {
                                       e.preventDefault();
@@ -238,10 +238,10 @@ function RequestIdeaDialog() {
                   </div>
 
                   <div className="hstack gap-2 d-flex justify-content-end">
-                    <button type="button" class="btn btn-lg btn-outline-danger" data-bs-dismiss="modal" ref={closeDialogRef}>
+                    <button type="button" className="btn btn-lg btn-outline-danger" data-bs-dismiss="modal" ref={closeDialogRef}>
                       Close
                     </button>
-                    <button type="submit" class="btn btn-lg btn-primary">
+                    <button type="submit" className="btn btn-lg btn-primary">
                       Next
                     </button>
                   </div>

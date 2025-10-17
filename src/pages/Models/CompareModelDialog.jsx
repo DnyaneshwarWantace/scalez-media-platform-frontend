@@ -55,9 +55,9 @@ function CompareModelDialog() {
                     <div className="form-field">
                       <label className="form-label">Model A</label>
                       <select className="form-select" aria-label="Default select example" {...getFieldProps("modelA")}>
-                        <option selected>Select a model</option>
+                        <option value="">Select a model</option>
                         {allModels.map((model) => {
-                          return <option value={model._id}>{model.name}</option>;
+                          return <option key={model._id} value={model._id}>{model.name}</option>;
                         })}
                       </select>
                       <span className="invalid-feedback" style={{ display: Boolean(touched.modelA && errors.modelA) ? "block" : "none" }}>
@@ -68,9 +68,9 @@ function CompareModelDialog() {
                     <div className="form-field">
                       <label className="form-label">Model B</label>
                       <select className="form-select" aria-label="Default select example" {...getFieldProps("modelB")}>
-                        <option selected>Select a model</option>
+                        <option value="">Select a model</option>
                         {allModels.map((model) => {
-                          return <option value={model._id}>{model.name}</option>;
+                          return <option key={model._id} value={model._id}>{model.name}</option>;
                         })}
                       </select>
                       <span className="invalid-feedback" style={{ display: Boolean(touched.modelB && errors.modelB) ? "block" : "none" }}>

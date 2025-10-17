@@ -58,7 +58,7 @@ function NodeResult({ traffic, convertedTraffic, name, label }) {
       >
         <div className="d-flex align-items-center border ps-1">
           <i
-            class="fa-solid fa-circle-check"
+            className="fa-solid fa-circle-check"
             style={{
               width: "0.1rem",
               fontSize: "0.5rem",
@@ -75,7 +75,7 @@ function NodeResult({ traffic, convertedTraffic, name, label }) {
 
         <div className="d-flex align-items-center border ps-1">
           <i
-            class="fa-solid fa-user"
+            className="fa-solid fa-user"
             style={{
               maxWidth: "0.3rem",
               width: "0.1rem",

@@ -185,7 +185,7 @@ function Learnings() {
                     </TableCell>
 
                     <TableCell className="p-0 py-3 px-4 align-middle">
-                      <Badge className="bg-black text-white hover:bg-black text-xs">
+                      <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 text-xs">
                         {learning.lever || "Not Defined"}
                       </Badge>
                     </TableCell>

@@ -162,7 +162,7 @@ function TourModal() {
 
               <div className="hstack gap-2 d-flex border-top pt-3">
                 <div className="flex-fill">
-                  <button type="button" class="btn btn-lg btn-text-primary" data-bs-dismiss="modal">
+                  <button type="button" className="btn btn-lg btn-text-primary" data-bs-dismiss="modal">
                     Close
                   </button>
                 </div>
@@ -170,7 +170,7 @@ function TourModal() {
                 <div className="hstack gap-2 d-flex justify-content-end">
                   <button
                     type="button"
-                    class="btn btn-lg btn-outline-primary"
+                    className="btn btn-lg btn-outline-primary"
                     onClick={() => {
                       previous();
                     }}
@@ -179,7 +179,7 @@ function TourModal() {
                   </button>
                   <button
                     type="submit"
-                    class="btn btn-lg btn-primary"
+                    className="btn btn-lg btn-primary"
                     onClick={() => {
                       next();
                     }}

@@ -49,7 +49,16 @@ import {
   Target,
   TrendingUp,
   Users,
-  MessageSquare
+  MessageSquare,
+  Plus,
+  BarChart3,
+  Bell,
+  Edit,
+  Trash2,
+  Play,
+  UserPlus,
+  Settings,
+  Activity
 } from "lucide-react";
 
 function IdeaInfo() {
@@ -93,6 +102,107 @@ function IdeaInfo() {
       name: "Monthly Revenue",
     },
   ];
+
+  // Function to generate comprehensive activity data for ideas
+  const generateIdeaActivities = () => {
+    const activities = [];
+
+    // Add comments as activities
+    if (selectedIdea?.comments) {
+      selectedIdea.comments.forEach(comment => {
+        activities.push({
+          id: `comment-${comment._id}`,
+          type: 'comment',
+          user: comment.createdBy,
+          action: 'commented',
+          description: comment.comment,
+          timestamp: comment.createdAt,
+          icon: MessageSquare,
+          color: 'text-blue-600'
+        });
+      });
+    }
+
+    // Add idea creation activity
+    if (selectedIdea?.createdAt) {
+      activities.push({
+        id: `idea-created-${selectedIdea._id}`,
+        type: 'idea_created',
+        user: selectedIdea.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'created idea',
+        description: selectedIdea.name,
+        timestamp: selectedIdea.createdAt,
+        icon: Plus,
+        color: 'text-indigo-600'
+      });
+    }
+
+    // Add idea updates activity
+    if (selectedIdea?.updatedAt && selectedIdea.updatedAt !== selectedIdea.createdAt) {
+      activities.push({
+        id: `idea-updated-${selectedIdea._id}`,
+        type: 'idea_updated',
+        user: selectedIdea.updatedBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated idea',
+        description: 'Idea details were modified',
+        timestamp: selectedIdea.updatedAt,
+        icon: Edit3,
+        color: 'text-orange-600'
+      });
+    }
+
+    // Add nominations as activities
+    if (selectedIdea?.nominations && selectedIdea.nominations.length > 0) {
+      selectedIdea.nominations.forEach((nominationId, index) => {
+        const nominator = projectUsers?.find(user => user._id === nominationId);
+        if (nominator) {
+          activities.push({
+            id: `nomination-${selectedIdea._id}-${index}`,
+            type: 'nomination',
+            user: nominator,
+            action: 'nominated idea',
+            description: 'Starred this idea',
+            timestamp: selectedIdea.updatedAt, // Using updatedAt as proxy for nomination time
+            icon: Star,
+            color: 'text-yellow-600'
+          });
+        }
+      });
+    }
+
+    // Add ICE score updates as activities
+    if (selectedIdea?.impact || selectedIdea?.confidence || selectedIdea?.ease) {
+      activities.push({
+        id: `ice-update-${selectedIdea._id}`,
+        type: 'ice_update',
+        user: selectedIdea.updatedBy || selectedIdea.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated ICE score',
+        description: `Impact: ${selectedIdea.impact || 0}, Confidence: ${selectedIdea.confidence || 0}, Ease: ${selectedIdea.ease || 0}`,
+        timestamp: selectedIdea.updatedAt || selectedIdea.createdAt,
+        icon: BarChart3,
+        color: 'text-green-600'
+      });
+    }
+
+    // Add tests created for this idea
+    if (selectedIdea?.tests) {
+      selectedIdea.tests.forEach(test => {
+        activities.push({
+          id: `test-${test._id}`,
+          type: 'test_created',
+          user: test.createdBy,
+          action: 'created test',
+          description: test.name,
+          timestamp: test.createdAt,
+          icon: Play,
+          color: 'text-red-600'
+        });
+      });
+    }
+
+    // Sort activities by timestamp (newest first)
+    return activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  };
 
   return (
     <div className="space-y-6">
@@ -268,7 +378,7 @@ function IdeaInfo() {
                       size="sm"
                       className={`h-8 ${
                         selectedIdea?.nominations.includes(JSON.parse(localStorage.getItem("user")).id)
-                          ? "bg-gray-900 text-white hover:bg-gray-800"
+                          ? "bg-gray-100 text-gray-800 hover:bg-gray-100"
                           : ""
                       }`}
                       onClick={() => {
@@ -320,7 +430,7 @@ function IdeaInfo() {
                     </div>
                     <div>
                       <h3 className="text-xs text-muted-foreground mb-1">ICE Score</h3>
-                      <Badge className="bg-gray-900 text-white hover:bg-gray-900 text-xs">
+                      <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 text-xs">
                         {selectedIdea?.score || 'Not Set'}
                       </Badge>
                     </div>
@@ -412,7 +522,7 @@ function IdeaInfo() {
                         <TableCell className="text-sm">{selectedIdea?.goal?.name || 'No goal assigned'}</TableCell>
                         <TableCell className="text-sm">{selectedIdea?.keymetric?.name || 'No metric assigned'}</TableCell>
                         <TableCell>
-                          <Badge className="bg-gray-900 text-white hover:bg-gray-900 text-xs">
+                          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 text-xs">
                             {selectedIdea?.lever || "Not Defined"}
                           </Badge>
                         </TableCell>
@@ -420,7 +530,7 @@ function IdeaInfo() {
                           {selectedIdea?.createdBy?.firstName} {selectedIdea?.createdBy?.lastName}
                         </TableCell>
                         <TableCell>
-                          <Badge className="bg-gray-900 text-white hover:bg-gray-900 text-xs">
+                          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 text-xs">
                             {selectedIdea?.nominations?.length || 0} nominations
                           </Badge>
                         </TableCell>
@@ -685,10 +795,54 @@ function IdeaInfo() {
                 </div>
               )}
             </div>
+
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Activity Card */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium">Recent Activity</h3>
+                  <Badge className="bg-gray-100 text-gray-800 text-xs">
+                    {generateIdeaActivities().length}
+                  </Badge>
+                </div>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {generateIdeaActivities().slice(0, 10).map((activity) => {
+                    const IconComponent = activity.icon;
+                    return (
+                      <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                        <div className="relative">
+                          <img
+                            src={`${backendServerBaseURL}/${activity.user?.avatar}`}
+                            className="w-6 h-6 rounded-full flex-shrink-0"
+                            alt=""
+                          />
+                          <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-white border border-gray-200 flex items-center justify-center`}>
+                            <IconComponent className={`w-2 h-2 ${activity.color}`} />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm leading-tight m-0">
+                            <span className="font-medium">{activity.user?.firstName} {activity.user?.lastName}</span> {activity.action}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate leading-tight m-0 mt-1" title={activity.description}>
+                            {activity.description}
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-tight m-0 mt-1">{moment(activity.timestamp).fromNow()}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {generateIdeaActivities().length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Edit Idea Card */}
             <Card>
               <CardContent className="p-4">

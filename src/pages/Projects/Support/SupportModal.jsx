@@ -79,7 +79,7 @@ function SupportModal({ isOpen, onClose }) {
               </div>
               <span className="font-medium text-sm">{title}</span>
             </div>
-            <Badge variant={isActive ? "default" : "secondary"} className="text-xs">
+            <Badge className={isActive ? "bg-black text-white" : "bg-gray-100 text-gray-800"} className="text-xs">
               <Clock className="h-3 w-3 mr-1" />
               {time}
             </Badge>
@@ -145,7 +145,7 @@ function SupportModal({ isOpen, onClose }) {
                     {/* Tutorial Steps */}
                     <div className="space-y-2 overflow-y-auto max-h-[500px]">
                       <div className="flex items-center gap-2 mb-4 sticky top-0 bg-background pb-2">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs">
                           <Clock className="h-3 w-3 mr-1" />
                           8 Timestamps (8 mins)
                         </Badge>

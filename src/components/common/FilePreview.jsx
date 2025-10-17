@@ -52,14 +52,14 @@ function FilePreview({ url, loading = false, overwiteIsImage = undefined }) {
           >
             {loading === true ? (
               <>
-                <div class="spinner-border text-light" role="status">
-                  <span class="visually-hidden">Loading...</span>
+                <div className="spinner-border text-light" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
               </>
             ) : (
               <>
-                <i class="bi bi-eye cp text-white" style={{ fontSize: "1rem" }} data-bs-toggle="modal" data-bs-target={`#${dialogId}`}></i>
-                {/* <i class="bi bi-trash3-fill cp text-danger" style={{ fontSize: "1rem", marginLeft: "1rem" }}></i> */}
+                <i className="bi bi-eye cp text-white" style={{ fontSize: "1rem" }} data-bs-toggle="modal" data-bs-target={`#${dialogId}`}></i>
+                {/* <i className="bi bi-trash3-fill cp text-danger" style={{ fontSize: "1rem", marginLeft: "1rem" }}></i> */}
               </>
             )}
           </div>
@@ -82,13 +82,13 @@ function FilePreview({ url, loading = false, overwiteIsImage = undefined }) {
               style={{ position: "absolute", bottom: "0px", width: "100%", backgroundColor: "rgba(0,0,0,0.7)" }}
             >
               <a href={fileUrl} download>
-              <i class="bi bi-download cp text-white" style={{ fontSize: "1.2rem" }}></i>
+              <i className="bi bi-download cp text-white" style={{ fontSize: "1.2rem" }}></i>
                </a>
 
-              {/* {loading !== true && <i class="bi bi-trash3-fill cp text-danger" style={{ fontSize: "1.2rem", marginLeft: "1.4rem" }}></i>} */}
+              {/* {loading !== true && <i className="bi bi-trash3-fill cp text-danger" style={{ fontSize: "1.2rem", marginLeft: "1.4rem" }}></i>} */}
               {loading === true && (
-                <div class="spinner-border spinner-border-sm text-light" role="status" style={{ marginLeft: "1.4rem" }}>
-                  <span class="visually-hidden">Loading...</span>
+                <div className="spinner-border spinner-border-sm text-light" role="status" style={{ marginLeft: "1.4rem" }}>
+                  <span className="visually-hidden">Loading...</span>
                 </div>
               )}
             </div>

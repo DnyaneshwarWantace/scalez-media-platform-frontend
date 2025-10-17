@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import { Plus, Edit3, Share2, Archive, BarChart3, Bell, Edit, Trash2, TrendingUp, Target, Play } from "lucide-react";
+import { Plus, Edit3, Share2, Archive, BarChart3, Bell, Edit, Trash2, TrendingUp, Target, Play, MessageSquare, UserPlus, Settings, Activity } from "lucide-react";
 import ReactECharts from 'echarts-for-react';
 import {
   addGoalComment,
@@ -82,6 +82,110 @@ function GoalInfo() {
 
   const [showLoader, setShowLoader] = useState(true);
   const [isSubmitting, setisSubmitting] = useState(false);
+
+  // Function to generate comprehensive activity data
+  const generateGoalActivities = () => {
+    const activities = [];
+
+    // Add comments as activities
+    if (singleGoalInfo?.comments) {
+      singleGoalInfo.comments.forEach(comment => {
+        activities.push({
+          id: `comment-${comment._id}`,
+          type: 'comment',
+          user: comment.createdBy,
+          action: 'commented',
+          description: comment.comment,
+          timestamp: comment.createdAt,
+          icon: MessageSquare,
+          color: 'text-blue-600'
+        });
+      });
+    }
+
+    // Add metric updates as activities
+    if (singleGoalInfo?.keymetric) {
+      singleGoalInfo.keymetric.forEach(metric => {
+        if (metric.metrics && metric.metrics.length > 0) {
+          metric.metrics.forEach((metricValue, index) => {
+            activities.push({
+              id: `metric-${metric._id}-${index}`,
+              type: 'metric_update',
+              user: metricValue.updatedBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+              action: 'updated metric',
+              description: `${metric.name}: ${metricValue.value}`,
+              timestamp: metricValue.updatedAt || metricValue.createdAt,
+              icon: BarChart3,
+              color: 'text-green-600'
+            });
+          });
+        }
+      });
+    }
+
+    // Add goal creation activity
+    if (singleGoalInfo?.createdAt) {
+      activities.push({
+        id: `goal-created-${singleGoalInfo._id}`,
+        type: 'goal_created',
+        user: singleGoalInfo.createdBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'created goal',
+        description: singleGoalInfo.name,
+        timestamp: singleGoalInfo.createdAt,
+        icon: Target,
+        color: 'text-purple-600'
+      });
+    }
+
+    // Add goal updates activity
+    if (singleGoalInfo?.updatedAt && singleGoalInfo.updatedAt !== singleGoalInfo.createdAt) {
+      activities.push({
+        id: `goal-updated-${singleGoalInfo._id}`,
+        type: 'goal_updated',
+        user: singleGoalInfo.updatedBy || { firstName: 'System', lastName: '', avatar: 'uploads/default.png' },
+        action: 'updated goal',
+        description: 'Goal details were modified',
+        timestamp: singleGoalInfo.updatedAt,
+        icon: Edit3,
+        color: 'text-orange-600'
+      });
+    }
+
+    // Add ideas created for this goal
+    if (singleGoalInfo?.ideas) {
+      singleGoalInfo.ideas.forEach(idea => {
+        activities.push({
+          id: `idea-${idea._id}`,
+          type: 'idea_created',
+          user: idea.createdBy,
+          action: 'created idea',
+          description: idea.name,
+          timestamp: idea.createdAt,
+          icon: Plus,
+          color: 'text-indigo-600'
+        });
+      });
+    }
+
+    // Add tests created for this goal
+    if (singleGoalInfo?.tests) {
+      singleGoalInfo.tests.forEach(test => {
+        activities.push({
+          id: `test-${test._id}`,
+          type: 'test_created',
+          user: test.createdBy,
+          action: 'created test',
+          description: test.name,
+          timestamp: test.createdAt,
+          icon: Play,
+          color: 'text-red-600'
+        });
+      });
+    }
+
+    // Sort activities by timestamp (newest first)
+    return activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  };
 
   // useEffect(() => {
   //   if (singleGoalInfo) {
@@ -630,7 +734,7 @@ function GoalInfo() {
                           {getActualProgressPercent()}%
                         </span>
                         {getActualProgressPercent() > 100 && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge className="bg-gray-100 text-gray-800 text-xs">
                             Exceeded Target
                           </Badge>
                         )}
@@ -962,7 +1066,7 @@ function GoalInfo() {
                       </div>
 
                       <div className="col-span-1 flex items-center">
-                        <Badge className="bg-gray-900 text-white text-xs font-medium">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs font-medium">
                           {idea?.score}
                         </Badge>
                       </div>
@@ -1078,7 +1182,7 @@ function GoalInfo() {
                       </div>
 
                       <div className="col-span-1 flex items-center">
-                        <Badge className="bg-gray-900 text-white text-xs font-medium">
+                        <Badge className="bg-gray-100 text-gray-800 text-xs font-medium">
                           {test.score}
                         </Badge>
           </div>
@@ -1329,24 +1433,38 @@ function GoalInfo() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium">Recent Activity</h3>
+                <Badge className="bg-gray-100 text-gray-800 text-xs">
+                  {generateGoalActivities().length}
+                </Badge>
               </div>
-              <div className="space-y-3">
-                {singleGoalInfo?.comments?.slice(0, 5)?.map((activity) => (
-                  <div key={activity._id} className="flex items-start gap-3 pb-3 border-b last:border-0">
-                    <img
-                      src={`${backendServerBaseURL}/${activity.createdBy?.avatar}`}
-                      className="w-6 h-6 rounded-full flex-shrink-0"
-                      alt=""
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm">
-                        <span className="font-medium">{activity.createdBy?.firstName} {activity.createdBy?.lastName}</span> commented
-                      </p>
-                      <p className="text-xs text-muted-foreground">{moment(activity.createdAt).fromNow()}</p>
-              </div>
-                  </div>
-                ))}
-                {(!singleGoalInfo?.comments || singleGoalInfo.comments.length === 0) && (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {generateGoalActivities().slice(0, 10).map((activity) => {
+                  const IconComponent = activity.icon;
+                  return (
+                    <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                      <div className="relative">
+                        <img
+                          src={`${backendServerBaseURL}/${activity.user?.avatar}`}
+                          className="w-6 h-6 rounded-full flex-shrink-0"
+                          alt=""
+                        />
+                        <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-white border border-gray-200 flex items-center justify-center`}>
+                          <IconComponent className={`w-2 h-2 ${activity.color}`} />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm leading-tight m-0">
+                          <span className="font-medium">{activity.user?.firstName} {activity.user?.lastName}</span> {activity.action}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate leading-tight m-0 mt-1" title={activity.description}>
+                          {activity.description}
+                        </p>
+                        <p className="text-xs text-muted-foreground leading-tight m-0 mt-1">{moment(activity.timestamp).fromNow()}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {generateGoalActivities().length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
                 )}
               </div>
@@ -1370,7 +1488,7 @@ function GoalInfo() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <p className="text-sm font-medium truncate flex-1">{idea.name}</p>
-                        <Badge className="ml-2 bg-gray-900 text-white text-xs">
+                        <Badge className="ml-2 bg-gray-100 text-gray-800 text-xs">
                           {idea.score}
                         </Badge>
                       </div>
@@ -1407,7 +1525,7 @@ function GoalInfo() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <p className="text-sm font-medium truncate flex-1">{test.name}</p>
-                        <Badge className="ml-2 bg-gray-900 text-white text-xs">
+                        <Badge className="ml-2 bg-gray-100 text-gray-800 text-xs">
                           {test.score}
                         </Badge>
               </div>

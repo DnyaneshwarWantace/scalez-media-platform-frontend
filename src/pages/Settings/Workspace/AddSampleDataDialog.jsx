@@ -1,19 +1,20 @@
 import { React, useEffect, useState } from "react";
-import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createMultipleProjects, selectProjects, selectGoals, selectIdeas, deleteMultipleProjects } from "../../../redux/slices/projectSlice"
 import { selectpopupMessage, updatepopupMessage } from "../../../redux/slices/dashboardSlice";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
+import { Button } from "../../../components/ui/button";
 
 function AddSampleDataDialog() {
     const dispatch = useDispatch();
     const params = useParams();
     const projectId = params.projectId;
-    const closeDialogRef = useRef();
     const navigate = useNavigate();
     const projects = useSelector(selectProjects);
     const goals = useSelector(selectGoals);
     const ideas = useSelector(selectIdeas);
+    const [isOpen, setIsOpen] = useState(false);
 
     let projectData = [{
         name: "Richfeel",
@@ -57,8 +58,21 @@ function AddSampleDataDialog() {
     //     }
     // }, [sampleDataBtn])
     const closeModal = () => {
-        closeDialogRef.current.click();
+        setIsOpen(false);
     };
+
+    // Listen for custom event to open dialog
+    useEffect(() => {
+        const handleOpenDialog = () => {
+            setIsOpen(true);
+        };
+
+        window.addEventListener('openAddSampleDataDialog', handleOpenDialog);
+        
+        return () => {
+            window.removeEventListener('openAddSampleDataDialog', handleOpenDialog);
+        };
+    }, []);
 
     const removeSampleData =  () => {
         let sampleProjects = projects.filter((x) => x.dataType === "SAMPLE");
@@ -76,7 +90,11 @@ function AddSampleDataDialog() {
 
     }
     const addSampleData = () => {
-        dispatch(createMultipleProjects(projectData, closeModal, navigate));
+        dispatch(createMultipleProjects({
+            projects: projectData,
+            closeModal: closeModal,
+            navigate: navigate
+        }));
         setTimeout(() => {navigate("/projects");}, 1000);
         closeModal();
         localStorage.setItem('sampleDataBtn', true)
@@ -84,63 +102,48 @@ function AddSampleDataDialog() {
     }
 
     return (
-        <>
-            <div>
-                <div className="modal fade" id="AddSampleDataDialog" tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-body">
-                                <div style={{ marginBottom: "24px" }}>
-                                {sampleDataBtn ? <h2>Remove Sample Data</h2> : <h2>Add Sample Data</h2>}
-                                    {sampleDataBtn ? <p>The sample data added will be removed, all the changes made to it will be removed. You can always add sample data again in Workspace.</p> :
-                                        <p>This step will add some projects to your dashboard, which will be reflected on everyone who is in your workspace. This can be reverted by deleting sample data under “workspace”</p>}
-                                </div>
-
-                                <div className="hstack gap-2 d-flex justify-content-end">
-                                    <button type="button" class="btn btn-lg btn-outline-danger" data-bs-dismiss="modal" ref={closeDialogRef}>
-                                        Cancel
-                                    </button>
-                                    {sampleDataBtn ?                                    
-                                    <button
-                                        id="liveToastBtn"
-                                        type="submit"
-                                        class="btn btn-lg btn-primary"
-                                        onClick={() => {
-                                            removeSampleData()
-
-                                        }}
-                                    >
-                                        Remove Sample Data
-                                    </button>                               
-                                    : <button
-                                        type="submit"
-                                        class="btn btn-lg btn-primary"
-                                        onClick={() => {
-                                            addSampleData()
-
-                                        }}
-                                    >
-                                        Add Sample Data
-                                    </button>
-                                    }
-                                   
-                                     {/* <button
-                                        type="submit"
-                                        class="btn btn-lg btn-primary"
-                                        onClick={(e) => {
-                                            addSampleData(e)
-
-                                        }}
-                                    >
-                                       {sampleDataBtn ? 'Remove Sample Data' : 'Add Sample Data' } 
-                                    </button> */}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>
+                        {sampleDataBtn ? 'Remove Sample Data' : 'Add Sample Data'}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {sampleDataBtn 
+                            ? 'The sample data added will be removed, all the changes made to it will be removed. You can always add sample data again in Workspace.'
+                            : 'This step will add some projects to your dashboard, which will be reflected on everyone who is in your workspace. This can be reverted by deleting sample data under "workspace".'
+                        }
+                    </DialogDescription>
+                </DialogHeader>
+                
+                <DialogFooter className="flex gap-2">
+                    <Button 
+                        variant="outline" 
+                        onClick={closeModal}
+                    >
+                        Cancel
+                    </Button>
+                    {sampleDataBtn ? (
+                        <Button
+                            variant="destructive"
+                            onClick={() => {
+                                removeSampleData();
+                            }}
+                        >
+                            Remove Sample Data
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={() => {
+                                addSampleData();
+                            }}
+                        >
+                            Add Sample Data
+                        </Button>
+                    )}
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
 

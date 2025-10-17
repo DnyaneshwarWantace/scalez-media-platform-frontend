@@ -141,7 +141,7 @@ function GoalBasedIdea({ goal }) {
                     </TableCell>
                     
                     <TableCell>
-                      <Badge className="bg-gray-900 text-white">
+                      <Badge className="bg-gray-100 text-gray-800">
                         {idea?.score}
                       </Badge>
                     </TableCell>

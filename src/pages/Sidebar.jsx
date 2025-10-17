@@ -39,7 +39,7 @@ export default () => {
               dispatch(updateselectedSidebarTab("canvas"));
             }}
           >
-            <i class="fa-solid fa-table-cells fa-2xl"></i>
+            <i className="fa-solid fa-table-cells fa-2xl"></i>
             <p className="fw-bold mb-0 sidebar_tab_fontSize mt-1">Canvas</p>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default () => {
               dispatch(updateselectedSidebarTab("reports"));
             }}
           >
-            <i class="fa-solid fa-chart-simple fa-2xl"></i>
+            <i className="fa-solid fa-chart-simple fa-2xl"></i>
             <p className="fw-bold mb-0 sidebar_tab_fontSize mt-1">Reports</p>
           </div>
         </div>
@@ -489,7 +489,7 @@ export default () => {
             }}
           >
             <div className="me-2">
-              <i class="fa-solid fa-folder"></i>
+              <i className="fa-solid fa-folder"></i>
             </div>
 
             <p className="mb-0">Project Summary</p>
@@ -510,7 +510,7 @@ export default () => {
           >
             <div className="me-2">
               <i
-                class="fa-solid fa-users"
+                className="fa-solid fa-users"
                 style={{
                   maxWidth: "0.3rem",
                   width: "0.1rem",
@@ -539,7 +539,7 @@ export default () => {
             }}
           >
             <div className="me-2">
-              <i class="fa-solid fa-code-compare"></i>
+              <i className="fa-solid fa-code-compare"></i>
             </div>
 
             <p className="mb-0">Scenario Comparison</p>
@@ -557,7 +557,7 @@ export default () => {
             }}
           >
             <div className="me-2">
-              <i class="fa-solid fa-chart-simple"></i>
+              <i className="fa-solid fa-chart-simple"></i>
             </div>
 
             <p className="mb-0">Dream Profit Goal</p>
@@ -589,7 +589,7 @@ export default () => {
             }}
           >
             <div className="me-2">
-              <i class="fa-solid fa-dollar-sign"></i>
+              <i className="fa-solid fa-dollar-sign"></i>
             </div>
 
             <p className="mb-0">MRR Cost</p>
@@ -607,7 +607,7 @@ export default () => {
             }}
           >
             <div className="me-2">
-              <i class="fa-solid fa-list"></i>
+              <i className="fa-solid fa-list"></i>
             </div>
             <p className="mb-0">List View</p>
           </div>

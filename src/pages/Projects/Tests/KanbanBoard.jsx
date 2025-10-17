@@ -118,7 +118,7 @@ function KanbanBoard({ tests, projectId, onTestClick }) {
                     <div className={`w-3 h-3 rounded-full ${column.color}`}></div>
                     <h3 className="font-semibold text-sm text-gray-900">{column.title}</h3>
                   </div>
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge className="bg-gray-100 text-gray-800 text-xs">
                     {columnTests.length}
                   </Badge>
                 </div>
